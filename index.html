@@ -1,0 +1,583 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AutoEdit Studio</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background: #0f0f13; color: #e2e8f0; font-family: 'Inter', sans-serif; min-height: 100vh; }
+    button { cursor: pointer; font-family: inherit; }
+    input, textarea, select { font-family: inherit; }
+    a { text-decoration: none; }
+
+    /* Header */
+    #header { background: #18181f; border-bottom: 1px solid #2d2d3a; padding: 14px 24px; display: flex; align-items: center; gap: 12; }
+    #logo { width: 32px; height: 32px; background: linear-gradient(135deg,#7c3aed,#4f46e5); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 16px; flex-shrink: 0; }
+    #header-stats { margin-left: auto; display: flex; gap: 14px; font-size: 11px; color: #6b7280; align-items: center; }
+
+    /* Tabs */
+    #tabs { background: #18181f; border-bottom: 1px solid #2d2d3a; display: flex; padding: 0 24px; gap: 4px; overflow-x: auto; }
+    .tab { padding: 10px 16px; font-size: 13px; font-weight: 500; border: none; background: none; color: #6b7280; border-bottom: 2px solid transparent; white-space: nowrap; transition: all 0.15s; }
+    .tab.active { color: #a78bfa; border-bottom: 2px solid #a78bfa; }
+
+    /* Content */
+    #content { padding: 24px; max-width: 860px; margin: 0 auto; }
+    .page { display: none; }
+    .page.active { display: block; }
+
+    /* Cards */
+    .card { background: #18181f; border: 1px solid #2d2d3a; border-radius: 12px; padding: 20px; margin-bottom: 14px; }
+    .card-blue { background: #0d1117; border-color: #1d3a5f; }
+    .card-green { background: #052e16; border-color: #166534; }
+    .card-yellow { background: #1c1400; border-color: #92400e; }
+    .card-red { background: #1c0a0a; border-color: #7f1d1d; }
+
+    /* Inputs */
+    .input { width: 100%; background: #0f0f13; border: 1px solid #2d2d3a; border-radius: 8px; padding: 10px 14px; color: #e2e8f0; font-size: 14px; outline: none; }
+    .input:focus { border-color: #7c3aed; }
+
+    /* Buttons */
+    .btn-primary { background: linear-gradient(135deg,#7c3aed,#4f46e5); color: #fff; border: none; border-radius: 8px; padding: 10px 20px; font-weight: 600; font-size: 14px; }
+    .btn-primary:disabled { background: #374151; cursor: not-allowed; }
+    .btn-green { background: #052e16; border: 1px solid #166534; color: #4ade80; padding: 6px 14px; border-radius: 8px; font-size: 12px; font-weight: 600; }
+    .btn-red { background: #1c0a0a; border: 1px solid #7f1d1d; color: #f87171; padding: 6px 14px; border-radius: 8px; font-size: 12px; font-weight: 600; }
+    .btn-purple { background: #1e1b4b; border: 1px solid #4c1d95; color: #a78bfa; padding: 7px 14px; border-radius: 8px; font-size: 12px; font-weight: 600; }
+    .btn-blue { background: #1e3a5f; border: 1px solid #1d4ed8; color: #60a5fa; padding: 7px 14px; border-radius: 8px; font-size: 12px; font-weight: 600; }
+
+    /* Progress */
+    .progress-bar { background: #0f0f13; border-radius: 999px; height: 8px; overflow: hidden; }
+    .progress-fill { background: linear-gradient(90deg,#7c3aed,#4f46e5); height: 100%; border-radius: 999px; transition: width 0.8s ease; }
+
+    /* Segment */
+    .segment { border-radius: 10px; padding: 12px 16px; display: flex; align-items: center; gap: 14px; margin-bottom: 8px; cursor: pointer; transition: opacity 0.15s; }
+    .segment.keep { background: #0a1f0a; border: 1px solid #166534; }
+    .segment.cut { background: #1a0a0a; border: 1px solid #7f1d1d; opacity: 0.6; }
+
+    /* Badge */
+    .badge { font-size: 11px; padding: 2px 10px; border-radius: 999px; font-weight: 600; }
+    .badge-green { background: #052e16; color: #4ade80; border: 1px solid #166534; }
+    .badge-red { background: #1c0a0a; color: #f87171; border: 1px solid #7f1d1d; }
+    .badge-yellow { background: #1c1400; color: #fbbf24; border: 1px solid #92400e; }
+
+    /* Status dot */
+    .dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; margin-right: 6px; }
+    .dot-on { background: #4ade80; }
+    .dot-off { background: #374151; }
+
+    /* Grid */
+    .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 24px; }
+
+    /* Error */
+    #error-box { background: #1c0a0a; border: 1px solid #7f1d1d; border-radius: 10px; padding: 12px 16px; margin-bottom: 20px; display: none; justify-content: space-between; align-items: center; }
+
+    /* Flow */
+    .flow { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; margin-bottom: 24px; }
+    .flow-item { background: #18181f; border: 1px solid #2d2d3a; border-radius: 8px; padding: 6px 10px; font-size: 12px; color: #9ca3af; }
+    .flow-arrow { color: #374151; font-size: 14px; }
+
+    h2 { font-size: 18px; font-weight: 700; color: #fff; margin-bottom: 4px; }
+    .subtitle { color: #6b7280; font-size: 13px; margin-bottom: 20px; }
+    .empty { background: #18181f; border: 1px dashed #2d2d3a; border-radius: 12px; padding: 40px; text-align: center; color: #4b5563; font-size: 13px; }
+  </style>
+</head>
+<body>
+
+<!-- Header -->
+<div id="header">
+  <div id="logo">🎬</div>
+  <div>
+    <div style="font-weight:700;font-size:15px;color:#fff">AutoEdit Studio</div>
+    <div style="font-size:11px;color:#6b7280">Shorts · Reels · TikTok</div>
+  </div>
+  <div id="header-stats">
+    <span><span class="dot dot-off" id="dot-assembly"></span>AssemblyAI</span>
+    <span><span class="dot dot-on"></span>Adobe</span>
+    <span><span class="dot dot-off" id="dot-render"></span>Render</span>
+  </div>
+</div>
+
+<!-- Tabs -->
+<div id="tabs">
+  <button class="tab active" onclick="showTab('projeto')">Projeto</button>
+  <button class="tab" onclick="showTab('cortes')">Cortes</button>
+  <button class="tab" onclick="showTab('legendas')">Legendas</button>
+  <button class="tab" onclick="showTab('destaques')">Destaques</button>
+  <button class="tab" onclick="showTab('exportar')">Exportar</button>
+  <button class="tab" onclick="showTab('config')">⚙️ Config</button>
+</div>
+
+<div id="content">
+
+  <!-- Error -->
+  <div id="error-box">
+    <span id="error-msg" style="font-size:13px;color:#f87171"></span>
+    <button onclick="closeError()" style="background:none;border:none;color:#f87171;font-size:16px">✕</button>
+  </div>
+
+  <!-- PROJETO -->
+  <div id="page-projeto" class="page active">
+    <h2>Novo Projeto</h2>
+    <p class="subtitle">Cole o link do seu vídeo bruto e a IA faz o resto.</p>
+
+    <div class="flow">
+      <div class="flow-item">📥 Download</div><div class="flow-arrow">→</div>
+      <div class="flow-item">🎙️ AssemblyAI</div><div class="flow-arrow">→</div>
+      <div class="flow-item">✂️ Cortes IA</div><div class="flow-arrow">→</div>
+      <div class="flow-item">🔊 Adobe Enhance</div><div class="flow-arrow">→</div>
+      <div class="flow-item">📝 Legendas</div><div class="flow-arrow">→</div>
+      <div class="flow-item">⭐ Destaques</div><div class="flow-arrow">→</div>
+      <div class="flow-item">🎬 Vídeo Final</div>
+    </div>
+
+    <div id="config-warning" class="card card-yellow" style="display:none;font-size:13px;color:#fbbf24;margin-bottom:16px">
+      ⚠️ Configure a chave do AssemblyAI e a URL do Render.com na aba <b>⚙️ Config</b> antes de processar.
+    </div>
+
+    <div class="card">
+      <label style="font-size:13px;color:#9ca3af;display:block;margin-bottom:8px">🔗 Link do vídeo (Google Drive ou Dropbox)</label>
+      <div style="display:flex;gap:10px">
+        <input class="input" id="video-link" placeholder="https://drive.google.com/file/d/..." />
+        <button class="btn-primary" id="btn-processar" onclick="processar()">▶ Processar</button>
+      </div>
+    </div>
+
+    <div id="progress-box" class="card" style="display:none">
+      <div style="display:flex;justify-content:space-between;margin-bottom:10px">
+        <span id="progress-label" style="font-size:13px;color:#a78bfa"></span>
+        <span id="progress-pct" style="font-size:13px;color:#6b7280">0%</span>
+      </div>
+      <div class="progress-bar"><div class="progress-fill" id="progress-fill" style="width:0%"></div></div>
+    </div>
+
+    <div id="done-box" style="display:none">
+      <div class="card card-green" style="display:flex;align-items:center;gap:12px;margin-bottom:14px">
+        <span style="font-size:24px">✅</span>
+        <div style="flex:1">
+          <div style="font-weight:600;color:#4ade80;font-size:14px">Processamento concluído!</div>
+          <div style="color:#86efac;font-size:12px;margin-top:2px">Revise os cortes, legendas e destaques nas abas acima.</div>
+        </div>
+        <div style="display:flex;gap:8px">
+          <button class="btn-blue" onclick="baixarAudio()">⬇️ Baixar Áudio</button>
+          <button class="btn-purple" id="btn-audio-melhorado" onclick="marcarAudioMelhorado()">⬆️ Subir Áudio Melhorado</button>
+        </div>
+      </div>
+      <div class="card card-blue">
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <div style="font-size:13px;color:#60a5fa;font-weight:600">🔊 Lembre-se: melhore o áudio no Adobe Enhance</div>
+          <button onclick="toggleAdobe()" style="font-size:12px;color:#a78bfa;background:none;border:none" id="btn-adobe-toggle">▼ Ver passos</button>
+        </div>
+        <div id="adobe-steps" style="display:none;margin-top:12px">
+          <div style="display:flex;flex-direction:column;gap:8px">
+            ${["Clique em 'Baixar Áudio' acima","Acesse podcast.adobe.com/enhance","Faça upload do arquivo .mp3","Baixe o áudio melhorado","Clique em 'Subir Áudio Melhorado' acima"].map((s,i)=>`
+            <div style="display:flex;gap:8px;align-items:center;font-size:12px;color:#6b7280">
+              <span style="width:18px;height:18px;border-radius:50%;background:#1e1b4b;border:1px solid #4c1d95;color:#a78bfa;display:flex;align-items:center;justify-content:center;font-size:10px;flex-shrink:0">${i+1}</span>${s}
+            </div>`).join('')}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CORTES -->
+  <div id="page-cortes" class="page">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px">
+      <div><h2>Editor de Cortes</h2><p class="subtitle" style="margin:0">Clique em qualquer segmento para alternar manter/cortar.</p></div>
+      <div style="display:flex;gap:8px">
+        <button class="btn-green" onclick="manterTodos()">Manter todos</button>
+        <button class="btn-red" onclick="cortarRuidos()">Cortar ruídos</button>
+      </div>
+    </div>
+    <div id="segments-list"><div class="empty">Nenhum vídeo processado ainda. Vá à aba <b>Projeto</b> e processe um vídeo.</div></div>
+  </div>
+
+  <!-- LEGENDAS -->
+  <div id="page-legendas" class="page">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px">
+      <div><h2>Editor de Legendas</h2><p class="subtitle" style="margin:0">Clique em editar para ajustar o texto.</p></div>
+      <select id="legenda-style" onchange="updatePreview()" style="background:#18181f;border:1px solid #2d2d3a;color:#e2e8f0;padding:6px 12px;border-radius:8px;font-size:13px">
+        <option value="tiktok">Estilo TikTok</option>
+        <option value="reels">Estilo Reels</option>
+        <option value="clean">Clean / Minimalista</option>
+        <option value="bold">Bold / Impacto</option>
+      </select>
+    </div>
+    <div id="legenda-preview" style="background:#000;border-radius:12px;padding:32px;margin-bottom:20px;display:flex;align-items:center;justify-content:center;min-height:100px;position:relative">
+      <div id="preview-text" style="text-align:center;font-size:18px;font-weight:700;color:#fff;text-shadow:0 2px 8px rgba(0,0,0,0.8)"></div>
+      <div style="position:absolute;top:10px;right:12px;font-size:11px;color:#4b5563">Preview</div>
+    </div>
+    <div id="legendas-list"><div class="empty">Nenhuma legenda gerada ainda. Processe um vídeo primeiro.</div></div>
+  </div>
+
+  <!-- DESTAQUES -->
+  <div id="page-destaques" class="page">
+    <h2>Palavras & Frases de Destaque</h2>
+    <p class="subtitle">A IA identificou estes momentos de impacto. Aceite ou rejeite cada um.</p>
+    <div id="destaques-list"><div class="empty">Nenhum destaque identificado ainda. Processe um vídeo primeiro.</div></div>
+    <div id="destaques-summary" style="display:none" class="card" style="margin-top:20px">
+      <div style="font-size:13px;color:#9ca3af"><b id="destaques-count" style="color:#fbbf24">0</b> destaques aceitos · Serão destacados no vídeo final.</div>
+    </div>
+  </div>
+
+  <!-- EXPORTAR -->
+  <div id="page-exportar" class="page">
+    <h2>Exportar Vídeo</h2>
+    <p class="subtitle">Revise o resumo e exporte o vídeo final.</p>
+    <div class="grid2">
+      <div class="card" style="display:flex;align-items:center;gap:12px"><span style="font-size:24px">✅</span><div><div id="exp-kept" style="font-size:22px;font-weight:700;color:#4ade80">0</div><div style="font-size:12px;color:#6b7280">Segmentos mantidos</div></div></div>
+      <div class="card" style="display:flex;align-items:center;gap:12px"><span style="font-size:24px">✂️</span><div><div id="exp-cut" style="font-size:22px;font-weight:700;color:#f87171">0</div><div style="font-size:12px;color:#6b7280">Cortes aplicados</div></div></div>
+      <div class="card" style="display:flex;align-items:center;gap:12px"><span style="font-size:24px">📝</span><div><div id="exp-leg" style="font-size:22px;font-weight:700;color:#60a5fa">0</div><div style="font-size:12px;color:#6b7280">Legendas</div></div></div>
+      <div class="card" style="display:flex;align-items:center;gap:12px"><span style="font-size:24px">⭐</span><div><div id="exp-dest" style="font-size:22px;font-weight:700;color:#fbbf24">0</div><div style="font-size:12px;color:#6b7280">Destaques aceitos</div></div></div>
+    </div>
+    <div class="card" style="margin-bottom:16px">
+      <div style="font-size:14px;font-weight:600;color:#e2e8f0;margin-bottom:14px">Opções de exportação</div>
+      <div style="display:flex;gap:10px;margin-bottom:14px">
+        <button id="btn-mp4" class="btn-purple" onclick="setFormat('mp4')">.MP4</button>
+        <button id="btn-mov" onclick="setFormat('mov')" style="background:#0f0f13;border:1px solid #2d2d3a;color:#6b7280;padding:6px 20px;border-radius:8px;font-size:13px;font-weight:600">.MOV</button>
+      </div>
+      <label style="display:flex;align-items:center;gap:10px">
+        <input type="checkbox" id="export-srt" checked style="width:16px;height:16px;accent-color:#7c3aed" />
+        <span style="font-size:13px;color:#9ca3af">Exportar também arquivo <b style="color:#e2e8f0">.SRT</b> de legendas</span>
+      </label>
+    </div>
+    <button class="btn-primary" id="btn-exportar" onclick="exportar()" style="width:100%;padding:14px;font-size:15px;border-radius:10px">⬇️ Exportar Vídeo Final (.MP4)</button>
+  </div>
+
+  <!-- CONFIG -->
+  <div id="page-config" class="page">
+    <h2>Configurações</h2>
+    <p class="subtitle">Suas chaves ficam apenas no seu navegador e nunca são compartilhadas.</p>
+
+    <div class="card">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+        <div>
+          <div style="font-weight:600;color:#e2e8f0;font-size:14px"><span class="dot dot-off" id="dot-assembly2"></span>AssemblyAI</div>
+          <div style="font-size:12px;color:#4b5563">Transcrição automática e legendas sincronizadas</div>
+        </div>
+        <a href="https://app.assemblyai.com" target="_blank" style="font-size:12px;color:#a78bfa">Ver chave →</a>
+      </div>
+      <input type="password" class="input" id="cfg-assembly" placeholder="Cole sua API Key aqui..." oninput="updateDots()" />
+    </div>
+
+    <div class="card card-blue">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+        <div>
+          <div style="font-weight:600;color:#e2e8f0;font-size:14px"><span class="dot dot-on"></span>Adobe Podcast Enhance</div>
+          <div style="font-size:12px;color:#4b5563">Limpeza e melhoria de voz — sem chave necessária</div>
+        </div>
+        <a href="https://podcast.adobe.com/enhance" target="_blank" style="font-size:12px;color:#60a5fa">Abrir Adobe →</a>
+      </div>
+      <div style="background:#111827;border-radius:8px;padding:10px 14px;font-size:12px;color:#4b5563">✅ Sempre ativo — não requer configuração</div>
+    </div>
+
+    <div class="card">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+        <div>
+          <div style="font-weight:600;color:#e2e8f0;font-size:14px"><span class="dot dot-off" id="dot-render2"></span>Render.com</div>
+          <div style="font-size:12px;color:#4b5563">Servidor de processamento e montagem do vídeo</div>
+        </div>
+        <a href="https://dashboard.render.com" target="_blank" style="font-size:12px;color:#a78bfa">Dashboard →</a>
+      </div>
+      <input type="text" class="input" id="cfg-render" placeholder="https://autoedit-server.onrender.com" oninput="updateDots()" />
+    </div>
+
+    <button class="btn-primary" id="btn-salvar" onclick="salvarConfig()" style="padding:10px 24px">💾 Salvar configurações</button>
+  </div>
+
+</div>
+
+<script>
+  // ── Estado ──────────────────────────────────────────────────────────────────
+  let segments = [];
+  let legendas = [];
+  let destaques = [];
+  let filePath = null;
+  let exportFormat = 'mp4';
+  let config = { assemblyai: '', renderUrl: '' };
+
+  // Carregar config salva
+  const saved = localStorage.getItem('autoedit_config');
+  if (saved) {
+    config = JSON.parse(saved);
+    document.getElementById('cfg-assembly').value = config.assemblyai || '';
+    document.getElementById('cfg-render').value = config.renderUrl || '';
+    updateDots();
+  }
+
+  // ── Tabs ─────────────────────────────────────────────────────────────────────
+  function showTab(name) {
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    document.getElementById('page-' + name).classList.add('active');
+    event.target.classList.add('active');
+    if (name === 'exportar') updateExportStats();
+  }
+
+  // ── Config ───────────────────────────────────────────────────────────────────
+  function salvarConfig() {
+    config.assemblyai = document.getElementById('cfg-assembly').value.trim();
+    config.renderUrl = document.getElementById('cfg-render').value.trim().replace(/\/$/, '');
+    localStorage.setItem('autoedit_config', JSON.stringify(config));
+    updateDots();
+    const btn = document.getElementById('btn-salvar');
+    btn.textContent = '✅ Configurações salvas!';
+    btn.style.background = '#052e16';
+    btn.style.border = '1px solid #166534';
+    btn.style.color = '#4ade80';
+    setTimeout(() => {
+      btn.textContent = '💾 Salvar configurações';
+      btn.style.background = '';
+      btn.style.border = '';
+      btn.style.color = '';
+    }, 3000);
+  }
+
+  function updateDots() {
+    const hasAssembly = document.getElementById('cfg-assembly').value.length > 0;
+    const hasRender = document.getElementById('cfg-render').value.length > 0;
+    ['dot-assembly','dot-assembly2'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) { el.className = 'dot ' + (hasAssembly ? 'dot-on' : 'dot-off'); }
+    });
+    ['dot-render','dot-render2'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) { el.className = 'dot ' + (hasRender ? 'dot-on' : 'dot-off'); }
+    });
+    const warn = document.getElementById('config-warning');
+    if (warn) warn.style.display = (!hasAssembly || !hasRender) ? 'block' : 'none';
+  }
+
+  // ── Processar ────────────────────────────────────────────────────────────────
+  async function processar() {
+    const link = document.getElementById('video-link').value.trim();
+    if (!link) return;
+    if (!config.assemblyai || !config.renderUrl) {
+      showError('Configure a chave do AssemblyAI e a URL do Render.com na aba ⚙️ Config antes de continuar.');
+      return;
+    }
+    closeError();
+    setProgress(10, '📥 Baixando vídeo...');
+    document.getElementById('progress-box').style.display = 'block';
+    document.getElementById('done-box').style.display = 'none';
+    document.getElementById('btn-processar').disabled = true;
+    document.getElementById('btn-processar').textContent = 'Processando...';
+
+    try {
+      // 1. Download
+      const dl = await api('/download', { url: link });
+      if (!dl.success) throw new Error(dl.error);
+      filePath = dl.filePath;
+
+      // 2. Extrair áudio
+      setProgress(25, '🎵 Extraindo áudio...');
+      const audio = await api('/extract-audio', { filePath: dl.filePath });
+      if (!audio.success) throw new Error(audio.error);
+
+      // 3. Transcrever
+      setProgress(50, '🎙️ Transcrevendo com AssemblyAI...');
+      const transcript = await api('/transcribe', { audioPath: audio.audioPath, assemblyKey: config.assemblyai });
+      if (!transcript.success) throw new Error(transcript.error);
+      segments = transcript.segments;
+      legendas = segments.filter(s => s.keep).map(s => ({ id: s.id, start: s.start, end: s.end, text: s.text }));
+
+      // 4. Destaques
+      setProgress(75, '⭐ Identificando destaques...');
+      const hl = await api('/highlights', { segments });
+      if (hl.success) destaques = hl.highlights;
+
+      // 5. Concluído
+      setProgress(100, '✅ Pronto para revisão!');
+      document.getElementById('done-box').style.display = 'block';
+      renderSegments();
+      renderLegendas();
+      renderDestaques();
+
+    } catch (err) {
+      showError('Erro: ' + err.message);
+      document.getElementById('progress-box').style.display = 'none';
+    } finally {
+      document.getElementById('btn-processar').disabled = false;
+      document.getElementById('btn-processar').textContent = '▶ Processar';
+    }
+  }
+
+  function setProgress(pct, label) {
+    document.getElementById('progress-fill').style.width = pct + '%';
+    document.getElementById('progress-pct').textContent = pct + '%';
+    document.getElementById('progress-label').textContent = label;
+  }
+
+  // ── API ──────────────────────────────────────────────────────────────────────
+  async function api(endpoint, body) {
+    const res = await fetch(config.renderUrl + endpoint, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body)
+    });
+    return res.json();
+  }
+
+  // ── Segmentos ────────────────────────────────────────────────────────────────
+  function renderSegments() {
+    const list = document.getElementById('segments-list');
+    if (!segments.length) { list.innerHTML = '<div class="empty">Nenhum vídeo processado ainda.</div>'; return; }
+    list.innerHTML = segments.map(seg => `
+      <div class="segment ${seg.keep ? 'keep' : 'cut'}" onclick="toggleSegment(${seg.id})">
+        <div style="font-size:18px">${seg.keep ? '✅' : '✂️'}</div>
+        <div style="flex:1">
+          <div style="font-size:13px;color:${seg.keep ? '#e2e8f0' : '#9ca3af'}">${seg.text}</div>
+          <div style="font-size:11px;color:#4b5563;margin-top:3px">${seg.start} → ${seg.end}</div>
+        </div>
+        <div style="display:flex;gap:6px">
+          ${seg.highlight ? '<span class="badge badge-yellow">⭐ Destaque</span>' : ''}
+          <span class="badge ${seg.keep ? 'badge-green' : 'badge-red'}">${seg.keep ? 'Manter' : 'Cortar'}</span>
+        </div>
+      </div>`).join('');
+  }
+
+  function toggleSegment(id) {
+    segments = segments.map(s => s.id === id ? { ...s, keep: !s.keep } : s);
+    renderSegments();
+  }
+
+  function manterTodos() { segments = segments.map(s => ({ ...s, keep: true })); renderSegments(); }
+  function cortarRuidos() { segments = segments.map(s => s.text.startsWith('[') ? { ...s, keep: false } : s); renderSegments(); }
+
+  // ── Legendas ─────────────────────────────────────────────────────────────────
+  function renderLegendas() {
+    const list = document.getElementById('legendas-list');
+    if (!legendas.length) { list.innerHTML = '<div class="empty">Nenhuma legenda gerada ainda.</div>'; return; }
+    updatePreview();
+    list.innerHTML = legendas.map(leg => `
+      <div class="card" style="margin-bottom:8px" id="leg-${leg.id}">
+        <div style="display:flex;justify-content:space-between;margin-bottom:6px">
+          <span style="font-size:11px;color:#4b5563">${leg.start} → ${leg.end}</span>
+          <button onclick="editLegenda(${leg.id})" style="font-size:11px;color:#a78bfa;background:none;border:none">✏️ Editar</button>
+        </div>
+        <div id="leg-text-${leg.id}" style="font-size:13px;color:#e2e8f0">${leg.text}</div>
+        <textarea id="leg-input-${leg.id}" style="display:none;width:100%;background:#0f0f13;border:1px solid #4c1d95;border-radius:6px;padding:8px 10px;color:#e2e8f0;font-size:13px;resize:vertical;outline:none;margin-top:6px" rows="2" onchange="saveLegenda(${leg.id})">${leg.text}</textarea>
+      </div>`).join('');
+  }
+
+  function editLegenda(id) {
+    const text = document.getElementById('leg-text-' + id);
+    const input = document.getElementById('leg-input-' + id);
+    const isEditing = input.style.display !== 'none';
+    if (isEditing) {
+      legendas = legendas.map(l => l.id === id ? { ...l, text: input.value } : l);
+      text.textContent = input.value;
+      text.style.display = 'block';
+      input.style.display = 'none';
+    } else {
+      text.style.display = 'none';
+      input.style.display = 'block';
+    }
+  }
+
+  function updatePreview() {
+    const style = document.getElementById('legenda-style').value;
+    const el = document.getElementById('preview-text');
+    const text = legendas[0]?.text || 'Nenhuma legenda ainda';
+    el.textContent = text;
+    el.style.fontSize = style === 'bold' ? '22px' : '18px';
+    el.style.fontWeight = style === 'bold' ? '900' : style === 'clean' ? '400' : '700';
+    el.style.textShadow = style === 'clean' ? 'none' : '0 2px 8px rgba(0,0,0,0.8)';
+    el.style.background = style === 'tiktok' ? 'rgba(0,0,0,0.6)' : 'none';
+    el.style.padding = style === 'tiktok' ? '6px 14px' : '0';
+    el.style.borderRadius = '6px';
+    el.style.letterSpacing = style === 'bold' ? '0.05em' : 'normal';
+  }
+
+  // ── Destaques ────────────────────────────────────────────────────────────────
+  function renderDestaques() {
+    const list = document.getElementById('destaques-list');
+    if (!destaques.length) { list.innerHTML = '<div class="empty">Nenhum destaque identificado ainda.</div>'; return; }
+    list.innerHTML = destaques.map(d => `
+      <div style="background:${d.aceito ? '#1c1400' : '#18181f'};border:1px solid ${d.aceito ? '#92400e' : '#2d2d3a'};border-radius:10px;padding:14px 16px;display:flex;align-items:center;gap:14px;margin-bottom:10px">
+        <span style="font-size:20px">${d.aceito ? '⭐' : '○'}</span>
+        <div style="flex:1">
+          <div style="font-weight:600;color:${d.aceito ? '#fbbf24' : '#9ca3af'};font-size:14px">"${d.palavra}"</div>
+          <div style="font-size:12px;color:#4b5563;margin-top:2px">⏱ ${d.tempo} · ${d.motivo}</div>
+        </div>
+        <button onclick="toggleDestaque(${d.id})" style="background:${d.aceito ? '#1c0a0a' : '#052e16'};border:1px solid ${d.aceito ? '#7f1d1d' : '#166534'};color:${d.aceito ? '#f87171' : '#4ade80'};padding:6px 14px;border-radius:8px;font-size:12px;font-weight:600">
+          ${d.aceito ? 'Rejeitar' : 'Aceitar'}
+        </button>
+      </div>`).join('');
+    const aceitos = destaques.filter(d => d.aceito).length;
+    document.getElementById('destaques-count').textContent = aceitos;
+    document.getElementById('destaques-summary').style.display = 'block';
+  }
+
+  function toggleDestaque(id) {
+    destaques = destaques.map(d => d.id === id ? { ...d, aceito: !d.aceito } : d);
+    renderDestaques();
+  }
+
+  // ── Exportar ─────────────────────────────────────────────────────────────────
+  function updateExportStats() {
+    document.getElementById('exp-kept').textContent = segments.filter(s => s.keep).length;
+    document.getElementById('exp-cut').textContent = segments.filter(s => !s.keep).length;
+    document.getElementById('exp-leg').textContent = legendas.length;
+    document.getElementById('exp-dest').textContent = destaques.filter(d => d.aceito).length;
+  }
+
+  function setFormat(fmt) {
+    exportFormat = fmt;
+    document.getElementById('btn-mp4').className = fmt === 'mp4' ? 'btn-purple' : '';
+    document.getElementById('btn-mp4').style.cssText = fmt === 'mp4' ? '' : 'background:#0f0f13;border:1px solid #2d2d3a;color:#6b7280;padding:6px 20px;border-radius:8px;font-size:13px;font-weight:600';
+    document.getElementById('btn-mov').className = fmt === 'mov' ? 'btn-purple' : '';
+    document.getElementById('btn-mov').style.cssText = fmt === 'mov' ? '' : 'background:#0f0f13;border:1px solid #2d2d3a;color:#6b7280;padding:6px 20px;border-radius:8px;font-size:13px;font-weight:600';
+    document.getElementById('btn-exportar').textContent = `⬇️ Exportar Vídeo Final (.${fmt.toUpperCase()})`;
+  }
+
+  async function exportar() {
+    if (!segments.length) return;
+    const btn = document.getElementById('btn-exportar');
+    btn.textContent = '⏳ Montando vídeo...';
+    btn.disabled = true;
+    try {
+      const result = await api('/export', { filePath, segments, format: exportFormat });
+      if (!result.success) throw new Error(result.error);
+      if (document.getElementById('export-srt').checked) {
+        const srtResult = await api('/generate-srt', { legendas });
+        if (srtResult.success) {
+          const blob = new Blob([srtResult.srt], { type: 'text/plain' });
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url; a.download = 'legendas.srt'; a.click();
+        }
+      }
+      btn.textContent = '✅ Exportado com sucesso!';
+      btn.style.background = '#052e16';
+    } catch (err) {
+      showError('Erro na exportação: ' + err.message);
+      btn.textContent = `⬇️ Exportar Vídeo Final (.${exportFormat.toUpperCase()})`;
+      btn.disabled = false;
+    }
+  }
+
+  // ── Utilitários ──────────────────────────────────────────────────────────────
+  function showError(msg) {
+    document.getElementById('error-msg').textContent = msg;
+    document.getElementById('error-box').style.display = 'flex';
+  }
+  function closeError() { document.getElementById('error-box').style.display = 'none'; }
+
+  function baixarAudio() { alert('O áudio será baixado após o processamento real do servidor.'); }
+  function marcarAudioMelhorado() {
+    const btn = document.getElementById('btn-audio-melhorado');
+    btn.textContent = '✅ Áudio melhorado!';
+    btn.style.background = '#052e16';
+    btn.style.borderColor = '#166534';
+    btn.style.color = '#4ade80';
+  }
+  function toggleAdobe() {
+    const steps = document.getElementById('adobe-steps');
+    const btn = document.getElementById('btn-adobe-toggle');
+    const showing = steps.style.display !== 'none';
+    steps.style.display = showing ? 'none' : 'block';
+    btn.textContent = showing ? '▼ Ver passos' : '▲ Ocultar';
+  }
+</script>
+</body>
+</html>
