@@ -1,62 +1,86 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>AutoEdit Studio</title>
   <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    body { background: #0f0f13; color: #e2e8f0; font-family: 'Inter', sans-serif; min-height: 100vh; }
-    button { cursor: pointer; font-family: inherit; }
-    input, textarea, select { font-family: inherit; }
-    a { text-decoration: none; }
-    #header { background: #18181f; border-bottom: 1px solid #2d2d3a; padding: 14px 24px; display: flex; align-items: center; gap: 12px; }
-    #logo { width: 32px; height: 32px; background: linear-gradient(135deg,#7c3aed,#4f46e5); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 16px; flex-shrink: 0; }
-    #header-stats { margin-left: auto; display: flex; gap: 14px; font-size: 11px; color: #6b7280; align-items: center; }
-    #tabs { background: #18181f; border-bottom: 1px solid #2d2d3a; display: flex; padding: 0 24px; gap: 4px; overflow-x: auto; }
-    .tab { padding: 10px 16px; font-size: 13px; font-weight: 500; border: none; background: none; color: #6b7280; border-bottom: 2px solid transparent; white-space: nowrap; transition: all 0.15s; }
-    .tab.active { color: #a78bfa; border-bottom: 2px solid #a78bfa; }
-    #content { padding: 24px; max-width: 860px; margin: 0 auto; }
-    .page { display: none; }
-    .page.active { display: block; }
-    .card { background: #18181f; border: 1px solid #2d2d3a; border-radius: 12px; padding: 20px; margin-bottom: 14px; }
-    .card-blue { background: #0d1117; border-color: #1d3a5f; }
-    .card-green { background: #052e16; border-color: #166534; }
-    .card-yellow { background: #1c1400; border-color: #92400e; }
-    .card-red { background: #1c0a0a; border-color: #7f1d1d; }
-    .input { width: 100%; background: #0f0f13; border: 1px solid #2d2d3a; border-radius: 8px; padding: 10px 14px; color: #e2e8f0; font-size: 14px; outline: none; }
-    .input:focus { border-color: #7c3aed; }
-    .btn-primary { background: linear-gradient(135deg,#7c3aed,#4f46e5); color: #fff; border: none; border-radius: 8px; padding: 10px 20px; font-weight: 600; font-size: 14px; }
-    .btn-primary:disabled { background: #374151; cursor: not-allowed; }
-    .btn-green { background: #052e16; border: 1px solid #166534; color: #4ade80; padding: 6px 14px; border-radius: 8px; font-size: 12px; font-weight: 600; }
-    .btn-red { background: #1c0a0a; border: 1px solid #7f1d1d; color: #f87171; padding: 6px 14px; border-radius: 8px; font-size: 12px; font-weight: 600; }
-    .btn-purple { background: #1e1b4b; border: 1px solid #4c1d95; color: #a78bfa; padding: 6px 14px; border-radius: 8px; font-size: 12px; font-weight: 600; }
-    .btn-yellow { background: #1c1400; border: 1px solid #92400e; color: #fbbf24; padding: 6px 14px; border-radius: 8px; font-size: 12px; font-weight: 600; }
-    .btn-gray { background: #1f2937; border: 1px solid #374151; color: #9ca3af; padding: 6px 14px; border-radius: 8px; font-size: 12px; font-weight: 600; }
-    .progress-bar { background: #0f0f13; border-radius: 999px; height: 8px; overflow: hidden; }
-    .progress-fill { background: linear-gradient(90deg,#7c3aed,#4f46e5); height: 100%; border-radius: 999px; transition: width 0.8s ease; }
-    .segment { border-radius: 10px; padding: 12px 16px; display: flex; align-items: center; gap: 12px; margin-bottom: 8px; transition: opacity 0.15s; }
-    .segment.keep { background: #0a1f0a; border: 1px solid #166534; }
-    .segment.cut { background: #1a0a0a; border: 1px solid #7f1d1d; opacity: 0.6; }
-    .badge { font-size: 11px; padding: 2px 10px; border-radius: 999px; font-weight: 600; }
-    .badge-green { background: #052e16; color: #4ade80; border: 1px solid #166534; }
-    .badge-red { background: #1c0a0a; color: #f87171; border: 1px solid #7f1d1d; }
-    .badge-yellow { background: #1c1400; color: #fbbf24; border: 1px solid #92400e; }
-    .dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; margin-right: 6px; }
-    .dot-on { background: #4ade80; }
-    .dot-off { background: #374151; }
-    .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 24px; }
-    #error-box { background: #1c0a0a; border: 1px solid #7f1d1d; border-radius: 10px; padding: 12px 16px; margin-bottom: 20px; display: none; justify-content: space-between; align-items: center; }
-    .flow { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; margin-bottom: 24px; }
-    .flow-item { background: #18181f; border: 1px solid #2d2d3a; border-radius: 8px; padding: 6px 10px; font-size: 12px; color: #9ca3af; }
-    .flow-arrow { color: #374151; font-size: 14px; }
-    h2 { font-size: 18px; font-weight: 700; color: #fff; margin-bottom: 4px; }
-    .subtitle { color: #6b7280; font-size: 13px; margin-bottom: 20px; }
-    .empty { background: #18181f; border: 1px dashed #2d2d3a; border-radius: 12px; padding: 40px; text-align: center; color: #4b5563; font-size: 13px; }
-    .tag { display: inline-flex; align-items: center; gap: 6px; background: #1c1400; border: 1px solid #92400e; color: #fbbf24; padding: 4px 10px; border-radius: 999px; font-size: 12px; font-weight: 600; margin: 4px; }
-    .tag button { background: none; border: none; color: #f87171; font-size: 14px; line-height: 1; padding: 0; }
-    .tag.inactive { background: #1f2937; border-color: #374151; color: #6b7280; }
-    .tag.inactive button { color: #4b5563; }
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{background:#0f0f13;color:#e2e8f0;font-family:'Inter',sans-serif;min-height:100vh}
+    button{cursor:pointer;font-family:inherit}
+    input,textarea,select{font-family:inherit}
+    a{text-decoration:none}
+
+    #header{background:#18181f;border-bottom:1px solid #2d2d3a;padding:14px 24px;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+    #logo{width:32px;height:32px;background:linear-gradient(135deg,#7c3aed,#4f46e5);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
+    #header-right{margin-left:auto;display:flex;gap:14px;font-size:11px;color:#6b7280;align-items:center;flex-wrap:wrap}
+
+    #tabs{background:#18181f;border-bottom:1px solid #2d2d3a;display:flex;padding:0 24px;gap:4px;overflow-x:auto}
+    .tab{padding:10px 16px;font-size:13px;font-weight:500;border:none;background:none;color:#6b7280;border-bottom:2px solid transparent;white-space:nowrap;transition:all .15s}
+    .tab.active{color:#a78bfa;border-bottom:2px solid #a78bfa}
+
+    #content{padding:24px;max-width:900px;margin:0 auto}
+    .page{display:none}.page.active{display:block}
+
+    .card{background:#18181f;border:1px solid #2d2d3a;border-radius:12px;padding:20px;margin-bottom:14px}
+    .card-blue{background:#0d1117;border-color:#1d3a5f}
+    .card-green{background:#052e16;border-color:#166534}
+    .card-yellow{background:#1c1400;border-color:#92400e}
+    .card-red{background:#1c0a0a;border-color:#7f1d1d}
+
+    .input{width:100%;background:#0f0f13;border:1px solid #2d2d3a;border-radius:8px;padding:10px 14px;color:#e2e8f0;font-size:14px;outline:none}
+    .input:focus{border-color:#7c3aed}
+
+    .btn-primary{background:linear-gradient(135deg,#7c3aed,#4f46e5);color:#fff;border:none;border-radius:8px;padding:10px 20px;font-weight:600;font-size:14px}
+    .btn-primary:disabled{background:#374151;cursor:not-allowed}
+    .btn-green{background:#052e16;border:1px solid #166534;color:#4ade80;padding:6px 14px;border-radius:8px;font-size:12px;font-weight:600}
+    .btn-red{background:#1c0a0a;border:1px solid #7f1d1d;color:#f87171;padding:6px 14px;border-radius:8px;font-size:12px;font-weight:600}
+    .btn-purple{background:#1e1b4b;border:1px solid #4c1d95;color:#a78bfa;padding:6px 14px;border-radius:8px;font-size:12px;font-weight:600}
+    .btn-yellow{background:#1c1400;border:1px solid #92400e;color:#fbbf24;padding:6px 14px;border-radius:8px;font-size:12px;font-weight:600}
+    .btn-gray{background:#1f2937;border:1px solid #374151;color:#9ca3af;padding:6px 14px;border-radius:8px;font-size:12px;font-weight:600}
+    .btn-download{background:linear-gradient(135deg,#059669,#047857);color:#fff;border:none;border-radius:10px;padding:14px;font-size:15px;font-weight:700;width:100%;margin-top:10px}
+
+    .progress-bar{background:#0f0f13;border-radius:999px;height:8px;overflow:hidden}
+    .progress-fill{background:linear-gradient(90deg,#7c3aed,#4f46e5);height:100%;border-radius:999px;transition:width .8s ease}
+
+    .segment{border-radius:10px;padding:12px 16px;display:flex;align-items:center;gap:12px;margin-bottom:8px;transition:opacity .15s}
+    .segment.keep{background:#0a1f0a;border:1px solid #166534}
+    .segment.cut{background:#1a0a0a;border:1px solid #7f1d1d;opacity:.6}
+
+    .badge{font-size:11px;padding:2px 10px;border-radius:999px;font-weight:600}
+    .badge-green{background:#052e16;color:#4ade80;border:1px solid #166534}
+    .badge-red{background:#1c0a0a;color:#f87171;border:1px solid #7f1d1d}
+    .badge-yellow{background:#1c1400;color:#fbbf24;border:1px solid #92400e}
+
+    .dot{width:8px;height:8px;border-radius:50%;display:inline-block;margin-right:5px;flex-shrink:0}
+    .dot-on{background:#4ade80}.dot-off{background:#374151}.dot-warn{background:#fbbf24}
+
+    .grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:24px}
+    #error-box{background:#1c0a0a;border:1px solid #7f1d1d;border-radius:10px;padding:12px 16px;margin-bottom:20px;display:none;justify-content:space-between;align-items:center}
+
+    .flow{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-bottom:24px}
+    .flow-item{background:#18181f;border:1px solid #2d2d3a;border-radius:8px;padding:6px 10px;font-size:12px;color:#9ca3af}
+    .flow-arrow{color:#374151;font-size:14px}
+
+    h2{font-size:18px;font-weight:700;color:#fff;margin-bottom:4px}
+    .subtitle{color:#6b7280;font-size:13px;margin-bottom:20px}
+    .empty{background:#18181f;border:1px dashed #2d2d3a;border-radius:12px;padding:40px;text-align:center;color:#4b5563;font-size:13px}
+
+    .tag{display:inline-flex;align-items:center;gap:6px;background:#1c1400;border:1px solid #92400e;color:#fbbf24;padding:4px 10px;border-radius:999px;font-size:12px;font-weight:600;margin:4px;cursor:default}
+    .tag button{background:none;border:none;color:#f87171;font-size:14px;line-height:1;padding:0;cursor:pointer}
+    .tag.inactive{background:#1f2937;border-color:#374151;color:#6b7280}
+    .tag.inactive button{color:#4b5563}
+
+    #server-status{display:flex;align-items:center;gap:8px;font-size:12px;padding:8px 14px;border-radius:8px;margin-bottom:16px}
+    #server-status.ok{background:#052e16;border:1px solid #166534;color:#4ade80}
+    #server-status.warn{background:#1c1400;border:1px solid #92400e;color:#fbbf24}
+    #server-status.err{background:#1c0a0a;border:1px solid #7f1d1d;color:#f87171}
+    #server-status.checking{background:#1e1b4b;border:1px solid #4c1d95;color:#a78bfa}
+
+    #video-preview-wrap{background:#000;border-radius:12px;overflow:hidden;margin-bottom:20px;display:none}
+    #video-preview-wrap iframe{width:100%;height:200px;border:none}
+
+    .restore-banner{background:#1e1b4b;border:1px solid #4c1d95;border-radius:10px;padding:12px 16px;margin-bottom:16px;display:flex;justify-content:space-between;align-items:center;font-size:13px;color:#a78bfa}
   </style>
 </head>
 <body>
@@ -67,13 +91,13 @@
     <div style="font-weight:700;font-size:15px;color:#fff">AutoEdit Studio</div>
     <div style="font-size:11px;color:#6b7280">Shorts · Reels · TikTok</div>
   </div>
-  <div id="header-stats">
-    <span id="stat-cortes" style="display:none">✂️ <b style="color:#f87171" id="n-cortes">0</b> cortes</span>
-    <span id="stat-kept" style="display:none">✅ <b style="color:#4ade80" id="n-kept">0</b> mantidos</span>
-    <span id="stat-dest" style="display:none">⭐ <b style="color:#fbbf24" id="n-dest">0</b> destaques</span>
-    <span><span class="dot dot-off" id="dot-assembly"></span>AssemblyAI</span>
-    <span><span class="dot dot-on"></span>Adobe</span>
-    <span><span class="dot dot-off" id="dot-render"></span>Render</span>
+  <div id="header-right">
+    <span id="stat-cortes" style="display:none">✂️ <b style="color:#f87171" id="n-cortes">0</b></span>
+    <span id="stat-kept" style="display:none">✅ <b style="color:#4ade80" id="n-kept">0</b></span>
+    <span id="stat-dest" style="display:none">⭐ <b style="color:#fbbf24" id="n-dest">0</b></span>
+    <span style="display:flex;align-items:center"><span class="dot dot-off" id="dot-assembly"></span>AssemblyAI</span>
+    <span style="display:flex;align-items:center"><span class="dot dot-on"></span>Adobe</span>
+    <span style="display:flex;align-items:center"><span class="dot dot-off" id="dot-render"></span>Render</span>
   </div>
 </div>
 
@@ -96,38 +120,63 @@
   <div id="page-projeto" class="page active">
     <h2>Novo Projeto</h2>
     <p class="subtitle">Cole o link do seu vídeo bruto e a IA faz o resto.</p>
+
+    <div id="server-status" class="checking">⏳ Verificando servidor...</div>
+
+    <div id="restore-banner" class="restore-banner" style="display:none">
+      💾 Sessão anterior encontrada. <span id="restore-info" style="color:#818cf8"></span>
+      <div style="display:flex;gap:8px">
+        <button class="btn-purple" onclick="restaurarSessao()">Restaurar</button>
+        <button class="btn-gray" onclick="descartarSessao()">Descartar</button>
+      </div>
+    </div>
+
     <div class="flow">
       <div class="flow-item">📥 Download</div><div class="flow-arrow">→</div>
       <div class="flow-item">🎙️ AssemblyAI</div><div class="flow-arrow">→</div>
       <div class="flow-item">✂️ Cortes IA</div><div class="flow-arrow">→</div>
       <div class="flow-item">🔊 Adobe Enhance</div><div class="flow-arrow">→</div>
       <div class="flow-item">📝 Legendas</div><div class="flow-arrow">→</div>
-      <div class="flow-item">⭐ Destaques</div><div class="flow-arrow">→</div>
+      <div class="flow-item">⭐ Destaques IA</div><div class="flow-arrow">→</div>
       <div class="flow-item">🎬 Vídeo Final</div>
     </div>
+
     <div id="config-warning" class="card card-yellow" style="display:none;font-size:13px;color:#fbbf24;margin-bottom:16px">
-      ⚠️ Configure a chave do AssemblyAI e a URL do Render.com na aba <b>⚙️ Config</b> antes de processar.
+      ⚠️ Configure suas chaves na aba <b>⚙️ Config</b> antes de processar.
     </div>
+
+    <!-- Preview do vídeo -->
+    <div id="video-preview-wrap">
+      <div style="padding:10px 14px;background:#18181f;font-size:12px;color:#6b7280;display:flex;justify-content:space-between;align-items:center">
+        <span>🎬 Preview do vídeo original</span>
+        <button onclick="fecharPreview()" style="background:none;border:none;color:#6b7280;font-size:14px">✕</button>
+      </div>
+      <iframe id="video-iframe" allowfullscreen></iframe>
+    </div>
+
     <div class="card">
       <label style="font-size:13px;color:#9ca3af;display:block;margin-bottom:8px">🔗 Link do vídeo (Google Drive ou Dropbox)</label>
       <div style="display:flex;gap:10px">
-        <input class="input" id="video-link" placeholder="https://drive.google.com/file/d/..." />
+        <input class="input" id="video-link" placeholder="https://drive.google.com/file/d/..." oninput="onLinkChange()" />
         <button class="btn-primary" id="btn-processar" onclick="processar()">▶ Processar</button>
       </div>
     </div>
+
     <div id="progress-box" class="card" style="display:none">
       <div style="display:flex;justify-content:space-between;margin-bottom:10px">
         <span id="progress-label" style="font-size:13px;color:#a78bfa"></span>
         <span id="progress-pct" style="font-size:13px;color:#6b7280">0%</span>
       </div>
       <div class="progress-bar"><div class="progress-fill" id="progress-fill" style="width:0%"></div></div>
+      <div id="progress-step" style="font-size:11px;color:#4b5563;margin-top:10px"></div>
     </div>
+
     <div id="done-box" style="display:none">
-      <div class="card card-green" style="display:flex;align-items:center;gap:12px;margin-bottom:14px">
+      <div class="card card-green" style="display:flex;align-items:center;gap:12px;margin-bottom:14px;flex-wrap:wrap">
         <span style="font-size:24px">✅</span>
         <div style="flex:1">
           <div style="font-weight:600;color:#4ade80;font-size:14px">Processamento concluído!</div>
-          <div style="color:#86efac;font-size:12px;margin-top:2px">Revise os cortes, legendas e destaques nas abas acima.</div>
+          <div style="color:#86efac;font-size:12px;margin-top:2px">Sessão salva automaticamente. Revise nas abas acima.</div>
         </div>
         <div style="display:flex;gap:8px;flex-wrap:wrap">
           <button class="btn-purple" onclick="baixarAudio()">⬇️ Baixar Áudio</button>
@@ -139,11 +188,11 @@
           <div style="font-size:13px;color:#60a5fa;font-weight:600">🔊 Melhore o áudio no Adobe Enhance</div>
           <button onclick="toggleAdobe()" style="font-size:12px;color:#a78bfa;background:none;border:none" id="btn-adobe-toggle">▼ Ver passos</button>
         </div>
-        <div id="adobe-steps" style="display:none;margin-top:12px;display:flex;flex-direction:column;gap:8px">
-          ${["Clique em 'Baixar Áudio' acima","Acesse podcast.adobe.com/enhance","Faça upload do arquivo .mp3","Baixe o áudio melhorado","Clique em 'Subir Áudio Melhorado' acima"].map((s,i)=>`
-          <div style="display:flex;gap:8px;align-items:center;font-size:12px;color:#6b7280">
-            <span style="width:18px;height:18px;border-radius:50%;background:#1e1b4b;border:1px solid #4c1d95;color:#a78bfa;display:flex;align-items:center;justify-content:center;font-size:10px;flex-shrink:0">${i+1}</span>${s}
-          </div>`).join('')}
+        <div id="adobe-steps" style="display:none;margin-top:12px;flex-direction:column;gap:8px">
+          <div style="display:flex;gap:8px;align-items:center;font-size:12px;color:#6b7280"><span style="width:18px;height:18px;border-radius:50%;background:#1e1b4b;border:1px solid #4c1d95;color:#a78bfa;display:flex;align-items:center;justify-content:center;font-size:10px;flex-shrink:0">1</span>Clique em 'Baixar Áudio' acima</div>
+          <div style="display:flex;gap:8px;align-items:center;font-size:12px;color:#6b7280"><span style="width:18px;height:18px;border-radius:50%;background:#1e1b4b;border:1px solid #4c1d95;color:#a78bfa;display:flex;align-items:center;justify-content:center;font-size:10px;flex-shrink:0">2</span>Acesse <a href="https://podcast.adobe.com/enhance" target="_blank" style="color:#a78bfa">podcast.adobe.com/enhance</a></div>
+          <div style="display:flex;gap:8px;align-items:center;font-size:12px;color:#6b7280"><span style="width:18px;height:18px;border-radius:50%;background:#1e1b4b;border:1px solid #4c1d95;color:#a78bfa;display:flex;align-items:center;justify-content:center;font-size:10px;flex-shrink:0">3</span>Faça upload do arquivo .mp3</div>
+          <div style="display:flex;gap:8px;align-items:center;font-size:12px;color:#6b7280"><span style="width:18px;height:18px;border-radius:50%;background:#1e1b4b;border:1px solid #4c1d95;color:#a78bfa;display:flex;align-items:center;justify-content:center;font-size:10px;flex-shrink:0">4</span>Baixe o áudio melhorado e clique em 'Subir Áudio Melhorado'</div>
         </div>
       </div>
     </div>
@@ -152,14 +201,14 @@
   <!-- CORTES -->
   <div id="page-cortes" class="page">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:10px">
-      <div><h2>Editor de Cortes</h2><p class="subtitle" style="margin:0">Clique no segmento para manter/cortar. Use ✕ para remover definitivamente.</p></div>
+      <div><h2>Editor de Cortes</h2><p class="subtitle" style="margin:0">Clique para manter/cortar. ✕ remove definitivamente.</p></div>
       <div style="display:flex;gap:8px;flex-wrap:wrap">
         <button class="btn-green" onclick="manterTodos()">✅ Manter todos</button>
         <button class="btn-red" onclick="cortarRuidos()">✂️ Cortar ruídos</button>
-        <button class="btn-purple" onclick="adicionarSegmento()">＋ Adicionar corte</button>
+        <button class="btn-purple" onclick="adicionarSegmento()">＋ Adicionar</button>
       </div>
     </div>
-    <div id="segments-list"><div class="empty">Nenhum vídeo processado ainda. Vá à aba <b>Projeto</b> e processe um vídeo.</div></div>
+    <div id="segments-list"><div class="empty">Nenhum vídeo processado ainda.</div></div>
   </div>
 
   <!-- LEGENDAS -->
@@ -174,47 +223,36 @@
       </select>
     </div>
     <div style="background:#000;border-radius:12px;padding:32px;margin-bottom:20px;display:flex;align-items:center;justify-content:center;min-height:100px;position:relative">
-      <div id="preview-text" style="text-align:center;font-size:18px;font-weight:700;color:#fff;text-shadow:0 2px 8px rgba(0,0,0,0.8)"></div>
+      <div id="preview-text" style="text-align:center;font-size:18px;font-weight:700;color:#fff;text-shadow:0 2px 8px rgba(0,0,0,0.8)">Nenhuma legenda ainda</div>
       <div style="position:absolute;top:10px;right:12px;font-size:11px;color:#4b5563">Preview</div>
     </div>
-    <div id="legendas-list"><div class="empty">Nenhuma legenda gerada ainda. Processe um vídeo primeiro.</div></div>
+    <div id="legendas-list"><div class="empty">Nenhuma legenda gerada ainda.</div></div>
   </div>
 
   <!-- DESTAQUES -->
   <div id="page-destaques" class="page">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;flex-wrap:wrap;gap:10px">
-      <div><h2>Destaques</h2><p class="subtitle" style="margin:0">Gerencie palavras e frases de impacto do vídeo.</p></div>
+      <div><h2>Destaques</h2><p class="subtitle" style="margin:0">Identificados pelo Claude. Adicione ou remova livremente.</p></div>
     </div>
-
-    <!-- Adicionar destaque manual -->
     <div class="card" style="margin-bottom:20px">
       <div style="font-size:13px;color:#9ca3af;margin-bottom:10px;font-weight:600">➕ Adicionar destaque manualmente</div>
       <div style="display:flex;gap:10px;flex-wrap:wrap">
-        <input class="input" id="novo-destaque-palavra" placeholder="Palavra ou frase de destaque" style="flex:2;min-width:160px" />
-        <input class="input" id="novo-destaque-tempo" placeholder="Tempo (ex: 00:14)" style="flex:1;min-width:100px" />
-        <input class="input" id="novo-destaque-motivo" placeholder="Motivo (opcional)" style="flex:2;min-width:160px" />
+        <input class="input" id="novo-destaque-palavra" placeholder="Palavra ou frase" style="flex:2;min-width:140px"/>
+        <input class="input" id="novo-destaque-tempo" placeholder="Tempo (00:14)" style="flex:1;min-width:90px"/>
+        <input class="input" id="novo-destaque-motivo" placeholder="Motivo (opcional)" style="flex:2;min-width:140px"/>
         <button class="btn-yellow" onclick="adicionarDestaque()">⭐ Adicionar</button>
       </div>
     </div>
-
-    <!-- Tags de destaques -->
-    <div class="card" style="margin-bottom:16px">
-      <div style="font-size:13px;color:#9ca3af;margin-bottom:12px;font-weight:600">
-        ⭐ Destaques ativos — clique para desativar
-      </div>
+    <div class="card" style="margin-bottom:14px">
+      <div style="font-size:13px;color:#9ca3af;margin-bottom:12px;font-weight:600">⭐ Ativos — clique para desativar</div>
       <div id="tags-ativos"></div>
-      <div id="tags-ativos-empty" style="font-size:12px;color:#4b5563;display:none">Nenhum destaque ativo ainda.</div>
+      <div id="tags-ativos-empty" style="font-size:12px;color:#4b5563;display:none">Nenhum destaque ativo.</div>
     </div>
-
     <div class="card">
-      <div style="font-size:13px;color:#9ca3af;margin-bottom:12px;font-weight:600">
-        ○ Destaques inativos — clique para ativar
-      </div>
+      <div style="font-size:13px;color:#9ca3af;margin-bottom:12px;font-weight:600">○ Inativos — clique para ativar</div>
       <div id="tags-inativos"></div>
       <div id="tags-inativos-empty" style="font-size:12px;color:#4b5563;display:none">Nenhum destaque inativo.</div>
     </div>
-
-    <!-- Lista completa -->
     <div id="destaques-list" style="margin-top:16px"></div>
   </div>
 
@@ -223,10 +261,10 @@
     <h2>Exportar Vídeo</h2>
     <p class="subtitle">Revise o resumo e exporte o vídeo final.</p>
     <div class="grid2">
-      <div class="card" style="display:flex;align-items:center;gap:12px"><span style="font-size:24px">✅</span><div><div id="exp-kept" style="font-size:22px;font-weight:700;color:#4ade80">0</div><div style="font-size:12px;color:#6b7280">Segmentos mantidos</div></div></div>
-      <div class="card" style="display:flex;align-items:center;gap:12px"><span style="font-size:24px">✂️</span><div><div id="exp-cut" style="font-size:22px;font-weight:700;color:#f87171">0</div><div style="font-size:12px;color:#6b7280">Cortes aplicados</div></div></div>
+      <div class="card" style="display:flex;align-items:center;gap:12px"><span style="font-size:24px">✅</span><div><div id="exp-kept" style="font-size:22px;font-weight:700;color:#4ade80">0</div><div style="font-size:12px;color:#6b7280">Mantidos</div></div></div>
+      <div class="card" style="display:flex;align-items:center;gap:12px"><span style="font-size:24px">✂️</span><div><div id="exp-cut" style="font-size:22px;font-weight:700;color:#f87171">0</div><div style="font-size:12px;color:#6b7280">Cortados</div></div></div>
       <div class="card" style="display:flex;align-items:center;gap:12px"><span style="font-size:24px">📝</span><div><div id="exp-leg" style="font-size:22px;font-weight:700;color:#60a5fa">0</div><div style="font-size:12px;color:#6b7280">Legendas</div></div></div>
-      <div class="card" style="display:flex;align-items:center;gap:12px"><span style="font-size:24px">⭐</span><div><div id="exp-dest" style="font-size:22px;font-weight:700;color:#fbbf24">0</div><div style="font-size:12px;color:#6b7280">Destaques aceitos</div></div></div>
+      <div class="card" style="display:flex;align-items:center;gap:12px"><span style="font-size:24px">⭐</span><div><div id="exp-dest" style="font-size:22px;font-weight:700;color:#fbbf24">0</div><div style="font-size:12px;color:#6b7280">Destaques</div></div></div>
     </div>
     <div class="card" style="margin-bottom:16px">
       <div style="font-size:14px;font-weight:600;color:#e2e8f0;margin-bottom:14px">Opções de exportação</div>
@@ -234,199 +272,333 @@
         <button id="btn-mp4" class="btn-purple" onclick="setFormat('mp4')">.MP4</button>
         <button id="btn-mov" class="btn-gray" onclick="setFormat('mov')">.MOV</button>
       </div>
-      <label style="display:flex;align-items:center;gap:10px">
-        <input type="checkbox" id="export-srt" checked style="width:16px;height:16px;accent-color:#7c3aed" />
-        <span style="font-size:13px;color:#9ca3af">Exportar também arquivo <b style="color:#e2e8f0">.SRT</b> de legendas</span>
+      <label style="display:flex;align-items:center;gap:10px;cursor:pointer">
+        <input type="checkbox" id="export-srt" checked style="width:16px;height:16px;accent-color:#7c3aed"/>
+        <span style="font-size:13px;color:#9ca3af">Exportar também arquivo <b style="color:#e2e8f0">.SRT</b></span>
       </label>
     </div>
     <button class="btn-primary" id="btn-exportar" onclick="exportar()" style="width:100%;padding:14px;font-size:15px;border-radius:10px">⬇️ Exportar Vídeo Final (.MP4)</button>
+    <div id="download-box" style="display:none;margin-top:12px">
+      <div class="card card-green" style="text-align:center">
+        <div style="font-size:14px;font-weight:600;color:#4ade80;margin-bottom:8px">✅ Vídeo processado com sucesso!</div>
+        <div style="font-size:12px;color:#86efac;margin-bottom:14px">Seu vídeo está pronto para download.</div>
+        <a id="download-link" href="#" target="_blank">
+          <button class="btn-download">⬇️ Baixar Vídeo Final</button>
+        </a>
+      </div>
+    </div>
   </div>
 
   <!-- CONFIG -->
   <div id="page-config" class="page">
     <h2>Configurações</h2>
-    <p class="subtitle">Suas chaves ficam apenas no seu navegador e nunca são compartilhadas.</p>
+    <p class="subtitle">Suas chaves ficam salvas no seu navegador.</p>
+
     <div class="card">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
-        <div>
-          <div style="font-weight:600;color:#e2e8f0;font-size:14px"><span class="dot dot-off" id="dot-assembly2"></span>AssemblyAI</div>
-          <div style="font-size:12px;color:#4b5563">Transcrição automática e legendas sincronizadas</div>
-        </div>
+        <div><div style="font-weight:600;color:#e2e8f0;font-size:14px;display:flex;align-items:center"><span class="dot dot-off" id="dot-assembly2"></span>AssemblyAI</div><div style="font-size:12px;color:#4b5563">Transcrição automática</div></div>
         <a href="https://app.assemblyai.com" target="_blank" style="font-size:12px;color:#a78bfa">Ver chave →</a>
       </div>
-      <input type="password" class="input" id="cfg-assembly" placeholder="Cole sua API Key aqui..." oninput="updateDots()" />
+      <input type="password" class="input" id="cfg-assembly" placeholder="Cole sua API Key aqui..." oninput="updateDots()"/>
     </div>
-    <div class="card card-blue">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
-        <div>
-          <div style="font-weight:600;color:#e2e8f0;font-size:14px"><span class="dot dot-on"></span>Adobe Podcast Enhance</div>
-          <div style="font-size:12px;color:#4b5563">Limpeza e melhoria de voz — sem chave necessária</div>
-        </div>
-        <a href="https://podcast.adobe.com/enhance" target="_blank" style="font-size:12px;color:#60a5fa">Abrir Adobe →</a>
-      </div>
-      <div style="background:#111827;border-radius:8px;padding:10px 14px;font-size:12px;color:#4b5563">✅ Sempre ativo — não requer configuração</div>
-    </div>
+
     <div class="card">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
-        <div>
-          <div style="font-weight:600;color:#e2e8f0;font-size:14px"><span class="dot dot-off" id="dot-render2"></span>Render.com</div>
-          <div style="font-size:12px;color:#4b5563">Servidor de processamento e montagem do vídeo</div>
-        </div>
+        <div><div style="font-weight:600;color:#e2e8f0;font-size:14px;display:flex;align-items:center"><span class="dot dot-off" id="dot-anthropic"></span>Anthropic (Claude)</div><div style="font-size:12px;color:#4b5563">Análise de destaques com IA</div></div>
+        <a href="https://console.anthropic.com" target="_blank" style="font-size:12px;color:#a78bfa">Ver chave →</a>
+      </div>
+      <input type="password" class="input" id="cfg-anthropic" placeholder="sk-ant-..." oninput="updateDots()"/>
+    </div>
+
+    <div class="card">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+        <div><div style="font-weight:600;color:#e2e8f0;font-size:14px;display:flex;align-items:center"><span class="dot dot-off" id="dot-cloudinary"></span>Cloudinary</div><div style="font-size:12px;color:#4b5563">Armazenamento e entrega do vídeo exportado</div></div>
+        <a href="https://cloudinary.com/console" target="_blank" style="font-size:12px;color:#a78bfa">Dashboard →</a>
+      </div>
+      <input type="text" class="input" id="cfg-cloud-name" placeholder="Cloud Name" style="margin-bottom:8px" oninput="updateDots()"/>
+      <input type="password" class="input" id="cfg-cloud-key" placeholder="API Key" style="margin-bottom:8px"/>
+      <input type="password" class="input" id="cfg-cloud-secret" placeholder="API Secret"/>
+    </div>
+
+    <div class="card card-blue">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+        <div><div style="font-weight:600;color:#e2e8f0;font-size:14px;display:flex;align-items:center"><span class="dot dot-on"></span>Adobe Podcast Enhance</div><div style="font-size:12px;color:#4b5563">Limpeza de áudio — sem chave necessária</div></div>
+        <a href="https://podcast.adobe.com/enhance" target="_blank" style="font-size:12px;color:#60a5fa">Abrir →</a>
+      </div>
+      <div style="background:#111827;border-radius:8px;padding:10px 14px;font-size:12px;color:#4b5563">✅ Sempre ativo</div>
+    </div>
+
+    <div class="card">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+        <div><div style="font-weight:600;color:#e2e8f0;font-size:14px;display:flex;align-items:center"><span class="dot dot-off" id="dot-render2"></span>Render.com</div><div style="font-size:12px;color:#4b5563">Servidor de processamento</div></div>
         <a href="https://dashboard.render.com" target="_blank" style="font-size:12px;color:#a78bfa">Dashboard →</a>
       </div>
-      <input type="text" class="input" id="cfg-render" placeholder="https://autoedit-server.onrender.com" oninput="updateDots()" />
+      <input type="text" class="input" id="cfg-render" placeholder="https://autoedit-server.onrender.com" oninput="updateDots()"/>
     </div>
+
     <button class="btn-primary" id="btn-salvar" onclick="salvarConfig()" style="padding:10px 24px">💾 Salvar configurações</button>
   </div>
 </div>
 
 <script>
-  let segments = [], legendas = [], destaques = [], filePath = null, exportFormat = 'mp4';
-  let config = { assemblyai: '', renderUrl: '' };
-  let adobeVisible = false;
+  // ── Estado ────────────────────────────────────────────────────────────────────
+  let segments=[], legendas=[], destaques=[], filePath=null, exportFormat='mp4', fullText='';
+  let config={assemblyai:'',renderUrl:'',anthropic:'',cloudName:'',cloudKey:'',cloudSecret:''};
+  let adobeVisible=false, serverOk=false;
 
-  const saved = localStorage.getItem('autoedit_config');
-  if (saved) {
-    config = JSON.parse(saved);
-    document.getElementById('cfg-assembly').value = config.assemblyai || '';
-    document.getElementById('cfg-render').value = config.renderUrl || '';
-    updateDots();
+  // ── Init ──────────────────────────────────────────────────────────────────────
+  (function init(){
+    const saved = localStorage.getItem('autoedit_config');
+    if(saved){ config=JSON.parse(saved); applyConfigToForm(); updateDots(); }
+    checkRestore();
+    if(config.renderUrl) pingServidor();
+    else setServerStatus('err','⚙️ Configure a URL do servidor na aba Config');
+  })();
+
+  function applyConfigToForm(){
+    document.getElementById('cfg-assembly').value = config.assemblyai||'';
+    document.getElementById('cfg-anthropic').value = config.anthropic||'';
+    document.getElementById('cfg-render').value = config.renderUrl||'';
+    document.getElementById('cfg-cloud-name').value = config.cloudName||'';
+    document.getElementById('cfg-cloud-key').value = config.cloudKey||'';
+    document.getElementById('cfg-cloud-secret').value = config.cloudSecret||'';
   }
 
-  function showTab(name, el) {
-    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-    document.getElementById('page-' + name).classList.add('active');
-    el.classList.add('active');
-    if (name === 'exportar') updateExportStats();
-    if (name === 'destaques') renderDestaques();
-  }
-
-  function salvarConfig() {
-    config.assemblyai = document.getElementById('cfg-assembly').value.trim();
-    config.renderUrl = document.getElementById('cfg-render').value.trim().replace(/\/$/, '');
-    localStorage.setItem('autoedit_config', JSON.stringify(config));
-    updateDots();
-    const btn = document.getElementById('btn-salvar');
-    btn.textContent = '✅ Configurações salvas!';
-    btn.style.cssText = 'background:#052e16;border:1px solid #166534;color:#4ade80;padding:10px 24px;border-radius:8px;font-size:14px;font-weight:600';
-    setTimeout(() => { btn.textContent = '💾 Salvar configurações'; btn.style.cssText = ''; }, 3000);
-  }
-
-  function updateDots() {
-    const hasA = document.getElementById('cfg-assembly').value.length > 0;
-    const hasR = document.getElementById('cfg-render').value.length > 0;
-    ['dot-assembly','dot-assembly2'].forEach(id => { const el = document.getElementById(id); if(el) el.className = 'dot ' + (hasA ? 'dot-on' : 'dot-off'); });
-    ['dot-render','dot-render2'].forEach(id => { const el = document.getElementById(id); if(el) el.className = 'dot ' + (hasR ? 'dot-on' : 'dot-off'); });
-    const w = document.getElementById('config-warning');
-    if(w) w.style.display = (!hasA || !hasR) ? 'block' : 'none';
-  }
-
-  async function processar() {
-    const link = document.getElementById('video-link').value.trim();
-    if (!link) return;
-    if (!config.assemblyai || !config.renderUrl) { showError('Configure as chaves na aba ⚙️ Config primeiro.'); return; }
-    closeError();
-    setProgress(10, '📥 Baixando vídeo...');
-    document.getElementById('progress-box').style.display = 'block';
-    document.getElementById('done-box').style.display = 'none';
-    const btn = document.getElementById('btn-processar');
-    btn.disabled = true; btn.textContent = 'Processando...';
-
-    try {
-      const dl = await api('/download', { url: link });
-      if (!dl.success) throw new Error(dl.error);
-      filePath = dl.filePath;
-
-      setProgress(25, '🎵 Extraindo áudio...');
-      const audio = await api('/extract-audio', { filePath: dl.filePath });
-      if (!audio.success) throw new Error(audio.error);
-
-      setProgress(50, '🎙️ Transcrevendo com AssemblyAI...');
-      const transcript = await api('/transcribe', { audioPath: audio.audioPath, assemblyKey: config.assemblyai });
-      if (!transcript.success) throw new Error(transcript.error);
-      segments = transcript.segments;
-      legendas = segments.filter(s => s.keep).map(s => ({ id: s.id, start: s.start, end: s.end, text: s.text }));
-
-      setProgress(75, '⭐ Identificando destaques...');
-      const hl = await api('/highlights', { segments });
-      if (hl.success) destaques = hl.highlights;
-
-      setProgress(100, '✅ Pronto para revisão!');
-      document.getElementById('done-box').style.display = 'block';
-      renderSegments(); renderLegendas(); renderDestaques();
-      updateHeaderStats();
-
-    } catch(err) {
-      showError('Erro: ' + err.message);
-      document.getElementById('progress-box').style.display = 'none';
-    } finally {
-      btn.disabled = false; btn.textContent = '▶ Processar';
+  // ── Ping automático ────────────────────────────────────────────────────────────
+  async function pingServidor(){
+    setServerStatus('checking','⏳ Verificando servidor...');
+    try{
+      const r = await Promise.race([
+        fetch(config.renderUrl+'/ping'),
+        new Promise((_,rej)=>setTimeout(()=>rej(new Error('timeout')),10000))
+      ]);
+      if(r.ok){ serverOk=true; setServerStatus('ok','✅ Servidor online e pronto'); }
+      else throw new Error('status '+r.status);
+    }catch(e){
+      serverOk=false;
+      setServerStatus('warn','⚠️ Servidor hibernado — aguarde e tente novamente (pode levar ~60s)');
+      // Tenta de novo após 15s
+      setTimeout(pingServidor, 15000);
     }
   }
 
-  function setProgress(pct, label) {
-    document.getElementById('progress-fill').style.width = pct + '%';
-    document.getElementById('progress-pct').textContent = pct + '%';
-    document.getElementById('progress-label').textContent = label;
+  function setServerStatus(type, msg){
+    const el = document.getElementById('server-status');
+    el.className = 'server-status '+type;
+    // remap class names
+    el.style.cssText = '';
+    const styles = {
+      ok:'background:#052e16;border:1px solid #166534;color:#4ade80',
+      warn:'background:#1c1400;border:1px solid #92400e;color:#fbbf24',
+      err:'background:#1c0a0a;border:1px solid #7f1d1d;color:#f87171',
+      checking:'background:#1e1b4b;border:1px solid #4c1d95;color:#a78bfa'
+    };
+    el.style.cssText = (styles[type]||'') + ';display:flex;align-items:center;gap:8px;font-size:12px;padding:8px 14px;border-radius:8px;margin-bottom:16px';
+    el.textContent = msg;
   }
 
-  async function api(endpoint, body) {
-    const res = await fetch(config.renderUrl + endpoint, {
-      method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body)
+  // ── Persistência ──────────────────────────────────────────────────────────────
+  function salvarSessao(){
+    const link = document.getElementById('video-link').value;
+    localStorage.setItem('autoedit_session', JSON.stringify({
+      segments, legendas, destaques, filePath, fullText, link,
+      savedAt: new Date().toLocaleString('pt-BR')
+    }));
+  }
+
+  function checkRestore(){
+    const raw = localStorage.getItem('autoedit_session');
+    if(!raw) return;
+    try{
+      const sess = JSON.parse(raw);
+      if(sess.segments && sess.segments.length > 0){
+        document.getElementById('restore-banner').style.display='flex';
+        document.getElementById('restore-info').textContent =
+          `${sess.segments.length} segmentos · ${sess.savedAt||''}`;
+        window._pendingSession = sess;
+      }
+    }catch(e){}
+  }
+
+  function restaurarSessao(){
+    const sess = window._pendingSession;
+    if(!sess) return;
+    segments = sess.segments||[];
+    legendas = sess.legendas||[];
+    destaques = sess.destaques||[];
+    filePath = sess.filePath||null;
+    fullText = sess.fullText||'';
+    if(sess.link) document.getElementById('video-link').value = sess.link;
+    renderSegments(); renderLegendas(); renderDestaques(); updateHeaderStats();
+    document.getElementById('done-box').style.display='block';
+    document.getElementById('restore-banner').style.display='none';
+    onLinkChange();
+  }
+
+  function descartarSessao(){
+    localStorage.removeItem('autoedit_session');
+    document.getElementById('restore-banner').style.display='none';
+  }
+
+  // ── Preview de vídeo ──────────────────────────────────────────────────────────
+  function onLinkChange(){
+    const url = document.getElementById('video-link').value.trim();
+    const driveMatch = url.match(/\/d\/(.*?)(\/|$)/);
+    const wrap = document.getElementById('video-preview-wrap');
+    if(driveMatch){
+      document.getElementById('video-iframe').src = `https://drive.google.com/file/d/${driveMatch[1]}/preview`;
+      wrap.style.display='block';
+    } else {
+      wrap.style.display='none';
+    }
+  }
+
+  function fecharPreview(){
+    document.getElementById('video-preview-wrap').style.display='none';
+  }
+
+  // ── Tabs ──────────────────────────────────────────────────────────────────────
+  function showTab(name, el){
+    document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+    document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+    document.getElementById('page-'+name).classList.add('active');
+    el.classList.add('active');
+    if(name==='exportar') updateExportStats();
+    if(name==='destaques') renderDestaques();
+  }
+
+  // ── Config ────────────────────────────────────────────────────────────────────
+  function salvarConfig(){
+    config.assemblyai = document.getElementById('cfg-assembly').value.trim();
+    config.anthropic = document.getElementById('cfg-anthropic').value.trim();
+    config.renderUrl = document.getElementById('cfg-render').value.trim().replace(/\/$/,'');
+    config.cloudName = document.getElementById('cfg-cloud-name').value.trim();
+    config.cloudKey = document.getElementById('cfg-cloud-key').value.trim();
+    config.cloudSecret = document.getElementById('cfg-cloud-secret').value.trim();
+    localStorage.setItem('autoedit_config', JSON.stringify(config));
+    updateDots();
+    if(config.renderUrl) pingServidor();
+    const btn=document.getElementById('btn-salvar');
+    btn.textContent='✅ Salvo!';
+    btn.style.cssText='background:#052e16;border:1px solid #166534;color:#4ade80;padding:10px 24px;border-radius:8px;font-size:14px;font-weight:600';
+    setTimeout(()=>{btn.textContent='💾 Salvar configurações';btn.style.cssText='';},3000);
+  }
+
+  function updateDots(){
+    const hasA = document.getElementById('cfg-assembly').value.length>0;
+    const hasR = document.getElementById('cfg-render').value.length>0;
+    const hasAnt = document.getElementById('cfg-anthropic').value.length>0;
+    const hasCloud = document.getElementById('cfg-cloud-name').value.length>0;
+    const set = (ids, on) => ids.forEach(id=>{const el=document.getElementById(id);if(el)el.className='dot '+(on?'dot-on':'dot-off');});
+    set(['dot-assembly','dot-assembly2'], hasA);
+    set(['dot-render','dot-render2'], hasR);
+    set(['dot-anthropic'], hasAnt);
+    set(['dot-cloudinary'], hasCloud);
+    const w=document.getElementById('config-warning');
+    if(w) w.style.display=(!hasA||!hasR)?'block':'none';
+  }
+
+  // ── API ───────────────────────────────────────────────────────────────────────
+  async function api(endpoint, body){
+    const res = await fetch(config.renderUrl+endpoint,{
+      method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(body)
     });
     return res.json();
   }
 
-  // ── Segmentos ────────────────────────────────────────────────────────────────
-  function renderSegments() {
-    const list = document.getElementById('segments-list');
-    if (!segments.length) { list.innerHTML = '<div class="empty">Nenhum vídeo processado ainda.</div>'; return; }
-    list.innerHTML = segments.map(seg => `
-      <div class="segment ${seg.keep ? 'keep' : 'cut'}" id="seg-${seg.id}">
-        <div style="font-size:18px;cursor:pointer" onclick="toggleSegment(${seg.id})">${seg.keep ? '✅' : '✂️'}</div>
+  // ── Processar ─────────────────────────────────────────────────────────────────
+  async function processar(){
+    const link = document.getElementById('video-link').value.trim();
+    if(!link) return;
+    if(!config.assemblyai||!config.renderUrl){showError('Configure as chaves na aba ⚙️ Config.');return;}
+    if(!serverOk){showError('Aguarde o servidor ficar online (indicador verde no topo).');return;}
+    closeError();
+    document.getElementById('progress-box').style.display='block';
+    document.getElementById('done-box').style.display='none';
+    const btn=document.getElementById('btn-processar');
+    btn.disabled=true; btn.textContent='Processando...';
+
+    try{
+      setProgress(10,'📥 Baixando vídeo...');
+      const dl = await api('/download',{url:link});
+      if(!dl.success) throw new Error(dl.error);
+      filePath=dl.filePath;
+
+      setProgress(25,'🎵 Extraindo áudio...');
+      const audio = await api('/extract-audio',{filePath:dl.filePath});
+      if(!audio.success) throw new Error(audio.error);
+
+      setProgress(50,'🎙️ Transcrevendo com AssemblyAI...');
+      const transcript = await api('/transcribe',{audioPath:audio.audioPath});
+      if(!transcript.success) throw new Error(transcript.error);
+      segments=transcript.segments;
+      fullText=transcript.fullText||'';
+      legendas=segments.filter(s=>s.keep).map(s=>({id:s.id,start:s.start,end:s.end,text:s.text}));
+
+      setProgress(75,'🤖 Analisando destaques com Claude...');
+      const hl = await api('/highlights',{segments, fullText});
+      if(hl.success) destaques=hl.highlights;
+
+      setProgress(100,'✅ Pronto para revisão!');
+      document.getElementById('done-box').style.display='block';
+      renderSegments(); renderLegendas(); renderDestaques(); updateHeaderStats();
+      salvarSessao();
+
+    }catch(err){
+      showError('Erro: '+err.message);
+      document.getElementById('progress-box').style.display='none';
+    }finally{
+      btn.disabled=false; btn.textContent='▶ Processar';
+    }
+  }
+
+  function setProgress(pct,label){
+    document.getElementById('progress-fill').style.width=pct+'%';
+    document.getElementById('progress-pct').textContent=pct+'%';
+    document.getElementById('progress-label').textContent=label;
+  }
+
+  // ── Segmentos ─────────────────────────────────────────────────────────────────
+  function renderSegments(){
+    const list=document.getElementById('segments-list');
+    if(!segments.length){list.innerHTML='<div class="empty">Nenhum vídeo processado ainda.</div>';return;}
+    list.innerHTML=segments.map(seg=>`
+      <div class="segment ${seg.keep?'keep':'cut'}">
+        <div style="font-size:18px;cursor:pointer" onclick="toggleSegment(${seg.id})">${seg.keep?'✅':'✂️'}</div>
         <div style="flex:1;cursor:pointer" onclick="toggleSegment(${seg.id})">
-          <div style="font-size:13px;color:${seg.keep ? '#e2e8f0' : '#9ca3af'}">${seg.text}</div>
+          <div style="font-size:13px;color:${seg.keep?'#e2e8f0':'#9ca3af'}">${seg.text}</div>
           <div style="font-size:11px;color:#4b5563;margin-top:3px">${seg.start} → ${seg.end}</div>
         </div>
         <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap">
-          ${seg.highlight ? '<span class="badge badge-yellow">⭐</span>' : ''}
-          <span class="badge ${seg.keep ? 'badge-green' : 'badge-red'}">${seg.keep ? 'Manter' : 'Cortar'}</span>
-          <button onclick="removerSegmento(${seg.id})" style="background:#1c0a0a;border:1px solid #7f1d1d;color:#f87171;width:24px;height:24px;border-radius:6px;font-size:14px;display:flex;align-items:center;justify-content:center;flex-shrink:0">✕</button>
+          ${seg.highlight?'<span class="badge badge-yellow">⭐</span>':''}
+          <span class="badge ${seg.keep?'badge-green':'badge-red'}">${seg.keep?'Manter':'Cortar'}</span>
+          <button onclick="removerSegmento(${seg.id})" style="background:#1c0a0a;border:1px solid #7f1d1d;color:#f87171;width:24px;height:24px;border-radius:6px;font-size:14px;flex-shrink:0">✕</button>
         </div>
       </div>`).join('');
     updateHeaderStats();
+    salvarSessao();
   }
 
-  function toggleSegment(id) {
-    segments = segments.map(s => s.id === id ? { ...s, keep: !s.keep } : s);
+  function toggleSegment(id){segments=segments.map(s=>s.id===id?{...s,keep:!s.keep}:s);renderSegments();}
+  function removerSegmento(id){segments=segments.filter(s=>s.id!==id);renderSegments();}
+  function manterTodos(){segments=segments.map(s=>({...s,keep:true}));renderSegments();}
+  function cortarRuidos(){segments=segments.map(s=>s.text.startsWith('[')?{...s,keep:false}:s);renderSegments();}
+
+  function adicionarSegmento(){
+    const texto=prompt('Texto do segmento:');if(!texto)return;
+    const inicio=prompt('Tempo de início (ex: 00:15):')||'00:00';
+    const fim=prompt('Tempo de fim (ex: 00:20):')||'00:00';
+    const novoId=segments.length?Math.max(...segments.map(s=>s.id))+1:1;
+    segments.push({id:novoId,start:inicio,end:fim,startMs:0,endMs:0,text:texto,keep:true,highlight:false});
     renderSegments();
   }
 
-  function removerSegmento(id) {
-    segments = segments.filter(s => s.id !== id);
-    renderSegments();
-  }
-
-  function manterTodos() { segments = segments.map(s => ({ ...s, keep: true })); renderSegments(); }
-  function cortarRuidos() { segments = segments.map(s => s.text.startsWith('[') ? { ...s, keep: false } : s); renderSegments(); }
-
-  function adicionarSegmento() {
-    const texto = prompt('Texto do segmento:');
-    if (!texto) return;
-    const inicio = prompt('Tempo de início (ex: 00:15):') || '00:00';
-    const fim = prompt('Tempo de fim (ex: 00:20):') || '00:00';
-    const novoId = segments.length ? Math.max(...segments.map(s => s.id)) + 1 : 1;
-    segments.push({ id: novoId, start: inicio, end: fim, text: texto, keep: true, highlight: false });
-    renderSegments();
-  }
-
-  // ── Legendas ─────────────────────────────────────────────────────────────────
-  function renderLegendas() {
-    const list = document.getElementById('legendas-list');
-    if (!legendas.length) { list.innerHTML = '<div class="empty">Nenhuma legenda gerada ainda.</div>'; return; }
+  // ── Legendas ──────────────────────────────────────────────────────────────────
+  function renderLegendas(){
+    const list=document.getElementById('legendas-list');
+    if(!legendas.length){list.innerHTML='<div class="empty">Nenhuma legenda gerada ainda.</div>';return;}
     updatePreview();
-    list.innerHTML = legendas.map(leg => `
+    list.innerHTML=legendas.map(leg=>`
       <div class="card" style="margin-bottom:8px">
         <div style="display:flex;justify-content:space-between;margin-bottom:6px">
           <span style="font-size:11px;color:#4b5563">${leg.start} → ${leg.end}</span>
@@ -435,169 +607,148 @@
         <div id="leg-text-${leg.id}" style="font-size:13px;color:#e2e8f0">${leg.text}</div>
         <textarea id="leg-input-${leg.id}" style="display:none;width:100%;background:#0f0f13;border:1px solid #4c1d95;border-radius:6px;padding:8px 10px;color:#e2e8f0;font-size:13px;resize:vertical;outline:none;margin-top:6px;box-sizing:border-box" rows="2">${leg.text}</textarea>
       </div>`).join('');
+    salvarSessao();
   }
 
-  function editLegenda(id) {
-    const text = document.getElementById('leg-text-' + id);
-    const input = document.getElementById('leg-input-' + id);
-    const btn = document.getElementById('btn-edit-' + id);
-    const isEditing = input.style.display !== 'none';
-    if (isEditing) {
-      legendas = legendas.map(l => l.id === id ? { ...l, text: input.value } : l);
-      text.textContent = input.value;
-      text.style.display = 'block';
-      input.style.display = 'none';
-      btn.textContent = '✏️ Editar';
+  function editLegenda(id){
+    const text=document.getElementById('leg-text-'+id);
+    const input=document.getElementById('leg-input-'+id);
+    const btn=document.getElementById('btn-edit-'+id);
+    if(input.style.display!=='none'){
+      legendas=legendas.map(l=>l.id===id?{...l,text:input.value}:l);
+      text.textContent=input.value; text.style.display='block';
+      input.style.display='none'; btn.textContent='✏️ Editar';
+      salvarSessao();
     } else {
-      text.style.display = 'none';
-      input.style.display = 'block';
-      btn.textContent = '✓ Salvar';
+      text.style.display='none'; input.style.display='block'; btn.textContent='✓ Salvar';
     }
   }
 
-  function updatePreview() {
-    const style = document.getElementById('legenda-style').value;
-    const el = document.getElementById('preview-text');
-    el.textContent = legendas[0]?.text || 'Nenhuma legenda ainda';
-    el.style.fontSize = style === 'bold' ? '22px' : '18px';
-    el.style.fontWeight = style === 'bold' ? '900' : style === 'clean' ? '400' : '700';
-    el.style.textShadow = style === 'clean' ? 'none' : '0 2px 8px rgba(0,0,0,0.8)';
-    el.style.background = style === 'tiktok' ? 'rgba(0,0,0,0.6)' : 'none';
-    el.style.padding = style === 'tiktok' ? '6px 14px' : '0';
-    el.style.borderRadius = '6px';
-    el.style.letterSpacing = style === 'bold' ? '0.05em' : 'normal';
+  function updatePreview(){
+    const style=document.getElementById('legenda-style').value;
+    const el=document.getElementById('preview-text');
+    el.textContent=legendas[0]?.text||'Nenhuma legenda ainda';
+    el.style.fontSize=style==='bold'?'22px':'18px';
+    el.style.fontWeight=style==='bold'?'900':style==='clean'?'400':'700';
+    el.style.textShadow=style==='clean'?'none':'0 2px 8px rgba(0,0,0,0.8)';
+    el.style.background=style==='tiktok'?'rgba(0,0,0,0.6)':'none';
+    el.style.padding=style==='tiktok'?'6px 14px':'0';
+    el.style.borderRadius='6px';
+    el.style.letterSpacing=style==='bold'?'0.05em':'normal';
   }
 
   // ── Destaques ─────────────────────────────────────────────────────────────────
-  function renderDestaques() {
-    const ativos = destaques.filter(d => d.aceito);
-    const inativos = destaques.filter(d => !d.aceito);
-
-    const tagsAtivos = document.getElementById('tags-ativos');
-    const tagsInativos = document.getElementById('tags-inativos');
-    const emptyAtivos = document.getElementById('tags-ativos-empty');
-    const emptyInativos = document.getElementById('tags-inativos-empty');
-
-    tagsAtivos.innerHTML = ativos.map(d => `
-      <span class="tag" title="⏱ ${d.tempo} · ${d.motivo}">
-        ⭐ ${d.palavra}
-        <button onclick="toggleDestaque(${d.id})" title="Desativar">✕</button>
-      </span>`).join('');
-    emptyAtivos.style.display = ativos.length ? 'none' : 'block';
-
-    tagsInativos.innerHTML = inativos.map(d => `
-      <span class="tag inactive" title="⏱ ${d.tempo} · ${d.motivo}">
-        ○ ${d.palavra}
-        <button onclick="toggleDestaque(${d.id})" title="Ativar">＋</button>
-      </span>`).join('');
-    emptyInativos.style.display = inativos.length ? 'none' : 'block';
-
-    // Lista detalhada
-    const list = document.getElementById('destaques-list');
-    if (!destaques.length) { list.innerHTML = '<div class="empty">Nenhum destaque ainda. Adicione manualmente acima.</div>'; return; }
-    list.innerHTML = `<div style="font-size:12px;color:#4b5563;margin-bottom:10px">Lista completa (${destaques.length} destaques)</div>` +
-      destaques.map(d => `
-        <div style="background:${d.aceito ? '#1c1400' : '#18181f'};border:1px solid ${d.aceito ? '#92400e' : '#2d2d3a'};border-radius:10px;padding:12px 16px;display:flex;align-items:center;gap:12px;margin-bottom:8px">
-          <span style="font-size:18px">${d.aceito ? '⭐' : '○'}</span>
+  function renderDestaques(){
+    const ativos=destaques.filter(d=>d.aceito);
+    const inativos=destaques.filter(d=>!d.aceito);
+    document.getElementById('tags-ativos').innerHTML=ativos.map(d=>`
+      <span class="tag" title="${d.motivo}">⭐ ${d.palavra}<button onclick="toggleDestaque(${d.id})">✕</button></span>`).join('');
+    document.getElementById('tags-ativos-empty').style.display=ativos.length?'none':'block';
+    document.getElementById('tags-inativos').innerHTML=inativos.map(d=>`
+      <span class="tag inactive" title="${d.motivo}">○ ${d.palavra}<button onclick="toggleDestaque(${d.id})">＋</button></span>`).join('');
+    document.getElementById('tags-inativos-empty').style.display=inativos.length?'none':'block';
+    const list=document.getElementById('destaques-list');
+    if(!destaques.length){list.innerHTML='<div class="empty">Nenhum destaque ainda.</div>';return;}
+    list.innerHTML=`<div style="font-size:12px;color:#4b5563;margin-bottom:10px">${destaques.length} destaque(s) no total</div>`+
+      destaques.map(d=>`
+        <div style="background:${d.aceito?'#1c1400':'#18181f'};border:1px solid ${d.aceito?'#92400e':'#2d2d3a'};border-radius:10px;padding:12px 16px;display:flex;align-items:center;gap:12px;margin-bottom:8px">
+          <span style="font-size:18px">${d.aceito?'⭐':'○'}</span>
           <div style="flex:1">
-            <div style="font-weight:600;color:${d.aceito ? '#fbbf24' : '#9ca3af'};font-size:13px">"${d.palavra}"</div>
+            <div style="font-weight:600;color:${d.aceito?'#fbbf24':'#9ca3af'};font-size:13px">"${d.palavra}"</div>
             <div style="font-size:11px;color:#4b5563;margin-top:2px">⏱ ${d.tempo} · ${d.motivo}</div>
           </div>
           <div style="display:flex;gap:6px">
-            <button onclick="toggleDestaque(${d.id})" style="background:${d.aceito ? '#1c0a0a' : '#052e16'};border:1px solid ${d.aceito ? '#7f1d1d' : '#166534'};color:${d.aceito ? '#f87171' : '#4ade80'};padding:5px 12px;border-radius:8px;font-size:12px;font-weight:600">
-              ${d.aceito ? 'Desativar' : 'Ativar'}
-            </button>
+            <button onclick="toggleDestaque(${d.id})" style="background:${d.aceito?'#1c0a0a':'#052e16'};border:1px solid ${d.aceito?'#7f1d1d':'#166534'};color:${d.aceito?'#f87171':'#4ade80'};padding:5px 12px;border-radius:8px;font-size:12px;font-weight:600">${d.aceito?'Desativar':'Ativar'}</button>
             <button onclick="removerDestaque(${d.id})" style="background:#1c0a0a;border:1px solid #7f1d1d;color:#f87171;width:28px;height:28px;border-radius:6px;font-size:14px">✕</button>
           </div>
         </div>`).join('');
-
-    document.getElementById('n-dest').textContent = ativos.length;
+    document.getElementById('n-dest').textContent=ativos.length;
+    salvarSessao();
   }
 
-  function toggleDestaque(id) {
-    destaques = destaques.map(d => d.id === id ? { ...d, aceito: !d.aceito } : d);
-    renderDestaques();
-  }
+  function toggleDestaque(id){destaques=destaques.map(d=>d.id===id?{...d,aceito:!d.aceito}:d);renderDestaques();}
+  function removerDestaque(id){destaques=destaques.filter(d=>d.id!==id);renderDestaques();}
 
-  function removerDestaque(id) {
-    destaques = destaques.filter(d => d.id !== id);
-    renderDestaques();
-  }
-
-  function adicionarDestaque() {
-    const palavra = document.getElementById('novo-destaque-palavra').value.trim();
-    if (!palavra) { showError('Digite uma palavra ou frase para destacar.'); return; }
-    const tempo = document.getElementById('novo-destaque-tempo').value.trim() || '--:--';
-    const motivo = document.getElementById('novo-destaque-motivo').value.trim() || 'Adicionado manualmente';
-    const novoId = destaques.length ? Math.max(...destaques.map(d => d.id)) + 1 : 1;
-    destaques.push({ id: novoId, palavra, tempo, motivo, aceito: true });
-    document.getElementById('novo-destaque-palavra').value = '';
-    document.getElementById('novo-destaque-tempo').value = '';
-    document.getElementById('novo-destaque-motivo').value = '';
+  function adicionarDestaque(){
+    const palavra=document.getElementById('novo-destaque-palavra').value.trim();
+    if(!palavra){showError('Digite uma palavra ou frase.');return;}
+    const tempo=document.getElementById('novo-destaque-tempo').value.trim()||'--:--';
+    const motivo=document.getElementById('novo-destaque-motivo').value.trim()||'Adicionado manualmente';
+    const novoId=destaques.length?Math.max(...destaques.map(d=>d.id))+1:1;
+    destaques.push({id:novoId,palavra,tempo,motivo,aceito:true});
+    document.getElementById('novo-destaque-palavra').value='';
+    document.getElementById('novo-destaque-tempo').value='';
+    document.getElementById('novo-destaque-motivo').value='';
     renderDestaques();
   }
 
   // ── Exportar ──────────────────────────────────────────────────────────────────
-  function updateExportStats() {
-    document.getElementById('exp-kept').textContent = segments.filter(s => s.keep).length;
-    document.getElementById('exp-cut').textContent = segments.filter(s => !s.keep).length;
-    document.getElementById('exp-leg').textContent = legendas.length;
-    document.getElementById('exp-dest').textContent = destaques.filter(d => d.aceito).length;
+  function updateExportStats(){
+    document.getElementById('exp-kept').textContent=segments.filter(s=>s.keep).length;
+    document.getElementById('exp-cut').textContent=segments.filter(s=>!s.keep).length;
+    document.getElementById('exp-leg').textContent=legendas.length;
+    document.getElementById('exp-dest').textContent=destaques.filter(d=>d.aceito).length;
   }
 
-  function setFormat(fmt) {
-    exportFormat = fmt;
-    document.getElementById('btn-mp4').className = fmt === 'mp4' ? 'btn-purple' : 'btn-gray';
-    document.getElementById('btn-mov').className = fmt === 'mov' ? 'btn-purple' : 'btn-gray';
-    document.getElementById('btn-exportar').textContent = `⬇️ Exportar Vídeo Final (.${fmt.toUpperCase()})`;
+  function setFormat(fmt){
+    exportFormat=fmt;
+    document.getElementById('btn-mp4').className=fmt==='mp4'?'btn-purple':'btn-gray';
+    document.getElementById('btn-mov').className=fmt==='mov'?'btn-purple':'btn-gray';
+    document.getElementById('btn-exportar').textContent=`⬇️ Exportar Vídeo Final (.${fmt.toUpperCase()})`;
   }
 
-  async function exportar() {
-    if (!segments.length) return;
-    const btn = document.getElementById('btn-exportar');
-    btn.textContent = '⏳ Montando vídeo...'; btn.disabled = true;
-    try {
-      const result = await api('/export', { filePath, segments, format: exportFormat });
-      if (!result.success) throw new Error(result.error);
-      if (document.getElementById('export-srt').checked) {
-        const srtResult = await api('/generate-srt', { legendas });
-        if (srtResult.success) {
-          const blob = new Blob([srtResult.srt], { type: 'text/plain' });
-          const a = document.createElement('a');
-          a.href = URL.createObjectURL(blob); a.download = 'legendas.srt'; a.click();
+  async function exportar(){
+    if(!segments.length)return;
+    const btn=document.getElementById('btn-exportar');
+    btn.textContent='⏳ Montando vídeo...'; btn.disabled=true;
+    document.getElementById('download-box').style.display='none';
+    try{
+      const result = await api('/export',{filePath,segments,format:exportFormat});
+      if(!result.success) throw new Error(result.error);
+
+      // Mostrar botão de download
+      if(result.downloadUrl){
+        document.getElementById('download-link').href=result.downloadUrl;
+        document.getElementById('download-box').style.display='block';
+      }
+
+      if(document.getElementById('export-srt').checked){
+        const srtResult=await api('/generate-srt',{legendas});
+        if(srtResult.success){
+          const blob=new Blob([srtResult.srt],{type:'text/plain'});
+          const a=document.createElement('a');
+          a.href=URL.createObjectURL(blob); a.download='legendas.srt'; a.click();
         }
       }
-      btn.textContent = '✅ Exportado com sucesso!';
-      btn.style.background = '#052e16';
-    } catch(err) {
-      showError('Erro na exportação: ' + err.message);
-      btn.textContent = `⬇️ Exportar Vídeo Final (.${exportFormat.toUpperCase()})`;
-      btn.disabled = false;
+      btn.textContent='✅ Exportado!';
+      btn.style.cssText='background:#052e16;border:1px solid #166534;color:#4ade80;width:100%;padding:14px;font-size:15px;border-radius:10px;font-weight:700';
+    }catch(err){
+      showError('Erro na exportação: '+err.message);
+      btn.textContent=`⬇️ Exportar Vídeo Final (.${exportFormat.toUpperCase()})`;
+      btn.disabled=false; btn.style.cssText='';
     }
   }
 
   // ── Utilitários ───────────────────────────────────────────────────────────────
-  function updateHeaderStats() {
-    const kept = segments.filter(s => s.keep).length;
-    const cut = segments.filter(s => !s.keep).length;
-    document.getElementById('n-kept').textContent = kept;
-    document.getElementById('n-cortes').textContent = cut;
-    document.getElementById('n-dest').textContent = destaques.filter(d => d.aceito).length;
-    ['stat-cortes','stat-kept','stat-dest'].forEach(id => document.getElementById(id).style.display = 'inline');
+  function updateHeaderStats(){
+    document.getElementById('n-kept').textContent=segments.filter(s=>s.keep).length;
+    document.getElementById('n-cortes').textContent=segments.filter(s=>!s.keep).length;
+    document.getElementById('n-dest').textContent=destaques.filter(d=>d.aceito).length;
+    ['stat-cortes','stat-kept','stat-dest'].forEach(id=>document.getElementById(id).style.display='inline');
   }
 
-  function showError(msg) { document.getElementById('error-msg').textContent = msg; document.getElementById('error-box').style.display = 'flex'; }
-  function closeError() { document.getElementById('error-box').style.display = 'none'; }
-  function baixarAudio() { alert('O áudio será disponibilizado para download após o processamento completo.'); }
-  function marcarAudioMelhorado() {
-    const btn = document.getElementById('btn-audio-melhorado');
-    btn.textContent = '✅ Áudio melhorado!';
-    btn.style.cssText = 'background:#052e16;border:1px solid #166534;color:#4ade80;padding:6px 14px;border-radius:8px;font-size:12px;font-weight:600';
+  function showError(msg){document.getElementById('error-msg').textContent=msg;document.getElementById('error-box').style.display='flex';}
+  function closeError(){document.getElementById('error-box').style.display='none';}
+  function baixarAudio(){alert('O áudio será disponibilizado após o processamento completo.');}
+  function marcarAudioMelhorado(){
+    const btn=document.getElementById('btn-audio-melhorado');
+    btn.textContent='✅ Áudio melhorado!';
+    btn.style.cssText='background:#052e16;border:1px solid #166534;color:#4ade80;padding:6px 14px;border-radius:8px;font-size:12px;font-weight:600';
   }
-  function toggleAdobe() {
-    adobeVisible = !adobeVisible;
-    document.getElementById('adobe-steps').style.display = adobeVisible ? 'flex' : 'none';
-    document.getElementById('btn-adobe-toggle').textContent = adobeVisible ? '▲ Ocultar' : '▼ Ver passos';
+  function toggleAdobe(){
+    adobeVisible=!adobeVisible;
+    document.getElementById('adobe-steps').style.display=adobeVisible?'flex':'none';
+    document.getElementById('btn-adobe-toggle').textContent=adobeVisible?'▲ Ocultar':'▼ Ver passos';
   }
 </script>
 </body>
