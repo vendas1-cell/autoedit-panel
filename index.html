@@ -700,28 +700,55 @@
   async function exportar(){
     if(!segments.length)return;
     const btn=document.getElementById('btn-exportar');
-    btn.textContent='⏳ Montando vídeo...'; btn.disabled=true;
+    btn.disabled=true;
     document.getElementById('download-box').style.display='none';
+
     try{
+      // Dispara o job
       const result = await api('/export',{filePath,segments,format:exportFormat});
       if(!result.success) throw new Error(result.error);
 
-      // Mostrar botão de download
-      if(result.downloadUrl){
-        document.getElementById('download-link').href=result.downloadUrl;
-        document.getElementById('download-box').style.display='block';
-      }
+      const jobId = result.jobId;
+      // Polling a cada 5s
+      let dots = 0;
+      const poll = setInterval(async () => {
+        try {
+          dots = (dots+1)%4;
+          const dotStr = '.'.repeat(dots+1);
+          const res = await fetch(config.renderUrl+'/export-status/'+jobId);
+          const job = await res.json();
 
-      if(document.getElementById('export-srt').checked){
-        const srtResult=await api('/generate-srt',{legendas});
-        if(srtResult.success){
-          const blob=new Blob([srtResult.srt],{type:'text/plain'});
-          const a=document.createElement('a');
-          a.href=URL.createObjectURL(blob); a.download='legendas.srt'; a.click();
+          if(job.status==='processing'){
+            btn.textContent=`⏳ Processando${dotStr} ${job.progress||0}%`;
+          } else if(job.status==='uploading'){
+            btn.textContent=`☁️ Enviando para nuvem${dotStr}`;
+          } else if(job.status==='done'){
+            clearInterval(poll);
+            document.getElementById('download-link').href=job.downloadUrl;
+            document.getElementById('download-box').style.display='block';
+            btn.textContent='✅ Exportado!';
+            btn.style.cssText='background:#052e16;border:1px solid #166534;color:#4ade80;width:100%;padding:14px;font-size:15px;border-radius:10px;font-weight:700';
+            // Gerar SRT
+            if(document.getElementById('export-srt').checked){
+              const srtResult=await api('/generate-srt',{legendas});
+              if(srtResult.success){
+                const blob=new Blob([srtResult.srt],{type:'text/plain'});
+                const a=document.createElement('a');
+                a.href=URL.createObjectURL(blob); a.download='legendas.srt'; a.click();
+              }
+            }
+          } else if(job.status==='error'){
+            clearInterval(poll);
+            throw new Error(job.error);
+          }
+        } catch(pollErr) {
+          clearInterval(poll);
+          showError('Erro na exportação: '+pollErr.message);
+          btn.textContent=`⬇️ Exportar Vídeo Final (.${exportFormat.toUpperCase()})`;
+          btn.disabled=false; btn.style.cssText='';
         }
-      }
-      btn.textContent='✅ Exportado!';
-      btn.style.cssText='background:#052e16;border:1px solid #166534;color:#4ade80;width:100%;padding:14px;font-size:15px;border-radius:10px;font-weight:700';
+      }, 5000);
+
     }catch(err){
       showError('Erro na exportação: '+err.message);
       btn.textContent=`⬇️ Exportar Vídeo Final (.${exportFormat.toUpperCase()})`;
